@@ -235,7 +235,7 @@ export class TestEnvironment {
 
     return TestEnvironment.stubServiceWorkerEnvironment(config);
   }
-
+  
   static async initialize(config: TestEnvironmentConfig = {}) {
     // Erase and reset IndexedDb database name to something random
     Database.databaseInstance = null;
