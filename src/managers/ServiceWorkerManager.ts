@@ -81,7 +81,7 @@ export interface ServiceWorkerManagerConfig {
 export class ServiceWorkerManager {
 
   private context: Context;
-  private config: ServiceWorkerManagerConfig;
+  private readonly config: ServiceWorkerManagerConfig;
 
   constructor(context: Context, config: ServiceWorkerManagerConfig) {
     this.context = context;
