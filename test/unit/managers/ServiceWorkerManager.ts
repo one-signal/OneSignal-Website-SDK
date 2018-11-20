@@ -229,10 +229,25 @@ test('onNotificationClicked - notification click sends PUT api/v1/notification',
   t.true(notificationPutCall.isDone());
 });
 
+test('onNotificationClicked - notification click count omitted when appId is null', async t => {
+  await onNotificationClickedEnvSetup();
+
+  const notificationId = Random.getRandomUuid();
+
+  const notificationPutCall = nock("https://onesignal.com")
+    .put(`/api/v1/notifications/${notificationId}`)
+    .reply(200);
+
+  const notificationEvent = mockNotificationNotificationEventInit(notificationId);
+  await ServiceWorkerReal.onNotificationClicked(notificationEvent);
+
+  t.false(notificationPutCall.isDone());
+});
+
 function addNotificationPutNock(notificationId: string) {
   nock("https://onesignal.com")
     .put(`/api/v1/notifications/${notificationId}`)
-    .reply(200, {});
+    .reply(200);
 }
 
 test('onNotificationClicked - sends webhook', async t => {
@@ -268,6 +283,7 @@ test('onNotificationClicked - openWindow', async t => {
 //   stops executing as soon as openWindow is called, before the onNotificationClicked function finishes.
 test('onNotificationClicked - notification PUT Before openWindow', async t => {
   await onNotificationClickedEnvSetup();
+  await setupFakeAppId();
 
   const notificationId = Random.getRandomUuid();
 
@@ -286,8 +302,7 @@ test('onNotificationClicked - notification PUT Before openWindow', async t => {
   const notificationEvent = mockNotificationNotificationEventInit(notificationId);
   await ServiceWorkerReal.onNotificationClicked(notificationEvent);
 
-  t.is(callOrder[0], "notificationPut");
-  t.is(callOrder[1], "openWindow");
+  t.deepEqual(callOrder, ["notificationPut", "openWindow"]);
 });
 
 
