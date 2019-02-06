@@ -14,7 +14,7 @@
     "validator": "https://registry.npmjs.org/validator/-/validator-6.0.0.tgz"
   },
   "scripts": {
-    "clean": "rm -r build/ts-to-es6 && rm -r build/bundles",
+    "clean": "rm -rf build/ts-to-es6 && rm -rf build/bundles",
     "transpile:sources": "$(yarn bin)/tsc --project build/config/tsconfig.json",
     "transpile:tests": "$(yarn bin)/tsc --project build/config/tsconfig.tests.json",
     "bundle": "TESTS=false $(yarn bin)/webpack --config build/config/webpack.config.js",
@@ -26,7 +26,7 @@
     "build:dev": "ENV=development yarn transpile:sources && ENV=development yarn bundle-sw && ENV=development yarn bundle-sdk && ENV=development build/scripts/publish.sh",
     "build:staging": "ENV=staging yarn transpile:sources && ENV=staging yarn bundle-sw && ENV=staging yarn bundle-sdk && ENV=staging build/scripts/publish.sh",
     "build:prod": "ENV=production yarn transpile:sources && ENV=production yarn bundle-sw && ENV=production yarn bundle-sdk && ENV=production build/scripts/publish.sh",
-    "test": "ENV=development yarn transpile:tests && ava --verbose --color --watch",
+    "test": "yarn clean && ENV=development yarn transpile:tests && ava --verbose --color --watch",
     "test:noWatch": "ENV=development yarn transpile:tests && ava --verbose --color --watch=false",
     "publish": "yarn clean && yarn build:prod && yarn "
   },
