@@ -287,13 +287,13 @@ export default class InitHelper {
 
     context.sessionManager.incrementPageViewCount();
 
-    if (bowser.safari && OneSignal.config.userConfig.autoResubscribe === false) {
-      Log.debug('On Safari and autoResubscribe is false, skipping sessionInit().');
-      // This *seems* to trigger on either Safari's autoResubscribe false or Chrome HTTP
-      // Chrome HTTP gets an SDK_INITIALIZED event from the iFrame postMessage, so don't call it here
-      Event.trigger(OneSignal.EVENTS.SDK_INITIALIZED);
-      return;
-    }
+    // if (bowser.safari && OneSignal.config.userConfig.autoResubscribe === false) {
+    //   Log.debug('On Safari and autoResubscribe is false, skipping sessionInit().');
+    //   // This *seems* to trigger on either Safari's autoResubscribe false or Chrome HTTP
+    //   // Chrome HTTP gets an SDK_INITIALIZED event from the iFrame postMessage, so don't call it here
+    //   Event.trigger(OneSignal.EVENTS.SDK_INITIALIZED);
+    //   return;
+    // }
 
     // if (!OneSignal.config.userConfig.autoResubscribe && !OneSignal.config.subdomain) {
     //   Log.debug('Skipping internal init. Not auto-registering and no subdomain.');
@@ -414,25 +414,23 @@ export default class InitHelper {
         if (showSlidedown) {
           // TODO: check if force option is enough/needed
           OneSignal.config.userConfig.promptOptions.slidedown.enabled = true;
-          OneSignal.privateShowSlidedownPrompt();
+          OneSignal.context.promptsManager.internalShowSlidedownPrompt();
         } else {
-          OneSignal.privateShowAutoPrompt();
+          OneSignal.context.promptsManager.internalShowAutoPrompt();
         }
       }
     }
 
-    // TODO: check if it's really needed
-    if (!OneSignalUtils.isUsingSubscriptionWorkaround()) {
-      // from register for push notifications
-      if (options.__fromRegister) {
-        await InitHelper.finishSessionInit(options);
-        if (!isOptedOut) {
+    // from register for push notifications
+    if (options.__fromRegister) {
+      await InitHelper.finishSessionInit(options);
+      if (!isOptedOut) {
+        if (bowser.safari && Number(bowser.version) >= 12.1) {
+          await SubscriptionHelper.internalRegisterForPush(false);
+        } else {
           await SubscriptionHelper.registerForPush();
-          // OneSignal.setSubscription(true);
         }
       }
-    } else {
-      await InitHelper.finishSessionInit(options);
     }
   }
 

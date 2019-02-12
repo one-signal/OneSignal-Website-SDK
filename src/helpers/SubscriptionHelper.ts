@@ -11,6 +11,7 @@ import Log from '../libraries/Log';
 import { ContextSWInterface } from '../models/ContextSW';
 import SdkEnvironment from '../managers/SdkEnvironment';
 import { PermissionUtils } from "../utils/PermissionUtils";
+import { logMethodCall } from '../utils';
 
 export default class SubscriptionHelper {
   public static async registerForPush(): Promise<Subscription | null> {
@@ -19,6 +20,7 @@ export default class SubscriptionHelper {
   }
 
   public static async internalRegisterForPush(isPushEnabled: boolean): Promise<Subscription | null> {
+    logMethodCall("internalRegisterForPush", isPushEnabled);
     const context: ContextSWInterface = OneSignal.context;
     let subscription: Subscription;
 
