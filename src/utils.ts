@@ -1,5 +1,3 @@
-import bowser from 'bowser';
-
 import TimeoutError from './errors/TimeoutError';
 import SdkEnvironment from './managers/SdkEnvironment';
 import { WindowEnvironmentKind } from './models/WindowEnvironmentKind';
@@ -19,13 +17,6 @@ export function decodeHtmlEntities(text: string) {
   return BrowserUtils.decodeHtmlEntities(text);
 }
 
-export function isChromeLikeBrowser() {
-  return bowser.chrome ||
-    (bowser as any).chromium ||
-    (bowser as any).opera ||
-    (bowser as any).yandexbrowser;
-}
-
 export function removeDomElement(selector: string) {
   var els = document.querySelectorAll(selector);
   if (els.length > 0) {
@@ -36,10 +27,6 @@ export function removeDomElement(selector: string) {
       }
     }
   }
-}
-
-export function isLocalhostAllowedAsSecureOrigin() {
-  return OneSignalUtils.isLocalhostAllowedAsSecureOrigin();
 }
 
 /**
