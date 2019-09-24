@@ -501,14 +501,11 @@ export class ServiceWorker {
      */
     if (typeof options !== "object") {
       return options;
-    } else {
-      const clone = {...options};
+    }
+    else {
+      const clone = { ...options };
 
-      if (bowser.name === '' && bowser.version === '') {
-        var browser = (bowser as any)._detect(navigator.userAgent);
-      } else {
-        var browser: any = bowser;
-      }
+      const browser = OneSignalUtils.redetectBrowserUserAgent();
 
       if (browser.chrome &&
         browser.mac &&
