@@ -792,9 +792,9 @@ export class SubscriptionManager {
   public async registerFailedSubscription(
     subscriptionState: SubscriptionStateServiceWorkerNotIntalled,
     context: ContextSWInterface) {
-    if (context.sessionManager.isFirstPageView()) {
+    if (context.pageViewManager.isFirstPageView()) {
       context.subscriptionManager.registerSubscription(new RawPushSubscription(), subscriptionState);
-      context.sessionManager.incrementPageViewCount();
+      context.pageViewManager.incrementPageViewCount();
     }
   }
 }

@@ -19,7 +19,7 @@ import { ServiceWorkerManager } from "../../../src/managers/ServiceWorkerManager
 import { NotificationPermission } from "../../../src/models/NotificationPermission";
 import Database from "../../../src/services/Database";
 import { Subscription } from "../../../src/models/Subscription";
-import { SessionManager } from "../../../src/managers/SessionManager";
+import { PageViewManager } from "../../../src/managers/PageViewManager";
 import { SubscriptionManager } from "../../../src/managers/SubscriptionManager";
 import InitHelper from "../../../src/helpers/InitHelper";
 import ServiceWorkerRegistration from '../../support/mocks/service-workers/models/ServiceWorkerRegistration';
@@ -105,7 +105,7 @@ test.serial(`HTTPS: User not subscribed and not opted out => first page view => 
       autoResubscribe: false,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     await subscriptionPromise;
 });
@@ -142,7 +142,7 @@ test.serial(`HTTPS: User not subscribed and not opted out => first page view => 
     autoResubscribe: false,
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
   t.is(subscribeSpy.callCount, 0);
 });
@@ -186,7 +186,7 @@ test.serial(`HTTPS: User not subscribed and not opted out => first page view => 
       autoResubscribe: true,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     await registrationPromise;
     await subscriptionPromise;
@@ -218,7 +218,7 @@ test.serial(`HTTPS: User not subscribed and not opted out => first page view => 
       autoResubscribe: true,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     t.is(subscribeSpy.callCount, 0);
 });
@@ -247,7 +247,7 @@ test.serial(`HTTPS: User not subscribed and not opted out => first page view => 
       autoResubscribe: false,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     t.is(subscribeSpy.callCount, 0);
 });
@@ -285,7 +285,7 @@ test.serial(`HTTPS: User opted out => first page view => onSession flag is on =>
       }
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
 });
 
@@ -322,7 +322,7 @@ test.serial(`HTTPS: User opted out => first page view => onSession flag is off =
     }
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
   t.is(subscribeSpy.callCount, 0);
 });
@@ -341,7 +341,7 @@ test.serial(`HTTPS: User opted out => second page view => onSession flag is on =
   const subscribeSpy = sinonSandbox.spy(SubscriptionManager.prototype, "subscribe");
   await markUserAsOptedOut();
 
-  sinonSandbox.stub(SessionManager.prototype, "getPageViewCount").resolves(2);
+  sinonSandbox.stub(PageViewManager.prototype, "getPageViewCount").resolves(2);
 
   const initializePromise = new Promise((resolve) => {
     OneSignal.on(OneSignal.EVENTS.SDK_INITIALIZED_PUBLIC, () => {
@@ -405,7 +405,7 @@ test.serial(`HTTPS: User subscribed => first page view => expiring subscription 
     }
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
 });
 
@@ -441,7 +441,7 @@ test.serial(`HTTPS: User subscribed => first page view => sends on session`, asy
     }
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
 });
 
@@ -485,7 +485,7 @@ test.serial(`HTTP: User not subscribed and not opted out => first page view => s
       autoResubscribe: false,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     await subscriptionPromise;
 });
@@ -522,7 +522,7 @@ test.serial(`HTTP: User not subscribed and not opted out => first page view => s
     autoResubscribe: false,
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
   t.is(subscribeSpy.callCount, 0);
 });
@@ -554,7 +554,7 @@ test.serial(`HTTP: User not subscribed and not opted out => first page view => a
       autoResubscribe: true,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     t.is(subscribeSpy.callCount, 0);
 });
@@ -585,7 +585,7 @@ test.serial(`HTTP: User not subscribed and not opted out => first page view => a
       autoResubscribe: true,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     t.is(subscribeSpy.callCount, 0);
 });
@@ -614,7 +614,7 @@ test.serial(`HTTP: User not subscribed and not opted out => first page view => n
       autoResubscribe: false,
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
     t.is(subscribeSpy.callCount, 0);
 });
@@ -652,7 +652,7 @@ test.serial(`HTTP: User opted out => first page view => onSession flag is on => 
       }
     });
     await initPromise;
-    t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+    t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
     await initializePromise;
 });
 
@@ -689,7 +689,7 @@ test.serial(`HTTP: User opted out => first page view => onSession flag is off =>
     }
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
   t.is(subscribeSpy.callCount, 0);
 });
@@ -708,7 +708,7 @@ test.serial(`HTTP: User opted out => second page view => onSession flag is on =>
   const subscribeSpy = sinonSandbox.spy(SubscriptionManager.prototype, "subscribe");
   await markUserAsOptedOut();
 
-  sinonSandbox.stub(SessionManager.prototype, "getPageViewCount").resolves(2);
+  sinonSandbox.stub(PageViewManager.prototype, "getPageViewCount").resolves(2);
 
   const initializePromise = new Promise((resolve) => {
     OneSignal.on(OneSignal.EVENTS.SDK_INITIALIZED_PUBLIC, () => {
@@ -767,7 +767,7 @@ test.serial(`HTTP: User subscribed => first page view => expiring subscription =
     }
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
 });
 
@@ -803,7 +803,7 @@ test.serial(`HTTP: User subscribed => first page view => sends on session`, asyn
     }
   });
   await initPromise;
-  t.is(OneSignal.context.sessionManager.getPageViewCount(), 1);
+  t.is(OneSignal.context.pageViewManager.getPageViewCount(), 1);
   await initializePromise;
 });
 
