@@ -13,10 +13,12 @@ import { RawPushSubscription } from "../models/RawPushSubscription";
 import { SubscriptionStateKind } from "../models/SubscriptionStateKind";
 import { SubscriptionStrategyKind } from "../models/SubscriptionStrategyKind";
 import { PushDeviceRecord } from "../models/PushDeviceRecord";
+import { SessionPayload } from "../models/Session";
 import Log from "../libraries/Log";
 import { ConfigHelper } from "../helpers/ConfigHelper";
 import { OneSignalUtils } from "../utils/OneSignalUtils";
 import { Utils } from "../utils/Utils";
+import ServiceWorkerHelper from "../helpers/ServiceWorkerHelper";
 
 ///<reference path="../../typings/globals/service_worker_api/index.d.ts"/>
 declare var self: ServiceWorkerGlobalScope;
@@ -104,8 +106,8 @@ export class ServiceWorker {
 
       Also see: https://github.com/w3c/ServiceWorker/issues/1156
     */
-    Log.debug('Setting up message listeners.');
-    // self.addEventListener('message') is statically added inside the listen() method
+   Log.debug('Setting up message listeners.');
+   // self.addEventListener('message') is statically added inside the listen() method
     ServiceWorker.workerMessenger.listen();
     // Install messaging event handlers for page <-> service worker communication
     ServiceWorker.setupMessageListeners();
@@ -173,6 +175,24 @@ export class ServiceWorker {
       const context = new ContextSW(appConfig);
       await context.subscriptionManager.unsubscribe(UnsubscriptionStrategy.MarkUnsubscribed);
       ServiceWorker.workerMessenger.broadcast(WorkerMessengerCommand.AmpUnsubscribe, null);
+    });
+    ServiceWorker.workerMessenger.on(WorkerMessengerCommand.SessionUpsert, async (payload: SessionPayload) => {
+      Log.debug("[Service Worker] Received SessionUpsert", payload);
+      try {
+        await ServiceWorkerHelper.upsertSession(payload.sessionThreshold, payload.enableSessionDuration, self.timerId);
+      } catch(e) {
+        Log.error("Error in SW.SessionUpsert handler", e.message, e);
+      }
+    });
+
+    ServiceWorker.workerMessenger.on(WorkerMessengerCommand.SessionDeactivate, async (payload: SessionPayload) => {
+      Log.debug("[Service Worker] Received SessionDeactivate");
+      try {
+        self.timerId = await ServiceWorkerHelper.deactivateSession(
+          payload.sessionThreshold, payload.enableSessionDuration);
+      } catch(e) {
+        Log.error("Error in SW.SessionDeactivate handler", e);
+      }
     });
   }
 

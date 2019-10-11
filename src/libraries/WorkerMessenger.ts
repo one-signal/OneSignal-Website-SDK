@@ -20,6 +20,8 @@ export enum WorkerMessengerCommand {
   NotificationClicked = 'notification.clicked',
   NotificationDismissed = 'notification.dismissed',
   RedirectPage = 'command.redirect',
+  SessionUpsert = 'os.session.upsert',
+  SessionDeactivate = 'os.session.deactivate',
 }
 
 export interface WorkerMessengerMessage {
