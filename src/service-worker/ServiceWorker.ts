@@ -179,7 +179,14 @@ export class ServiceWorker {
     ServiceWorker.workerMessenger.on(WorkerMessengerCommand.SessionUpsert, async (payload: SessionPayload) => {
       Log.debug("[Service Worker] Received SessionUpsert", payload);
       try {
-        await ServiceWorkerHelper.upsertSession(payload.sessionThreshold, payload.enableSessionDuration, self.timerId);
+        await ServiceWorkerHelper.upsertSession(
+          payload.sessionThreshold,
+          payload.enableSessionDuration,
+          self.timerId,
+          payload.deviceRecord,
+          payload.deviceId,
+          payload.sessionOrigin
+        );
       } catch(e) {
         Log.error("Error in SW.SessionUpsert handler", e.message, e);
       }
