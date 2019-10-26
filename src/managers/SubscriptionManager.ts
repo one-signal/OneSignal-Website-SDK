@@ -103,10 +103,20 @@ export class SubscriptionManager {
         if ((await OneSignal.privateGetNotificationPermission()) === NotificationPermission.Denied)
           throw new PushPermissionNotGrantedError(PushPermissionNotGrantedErrorReason.Blocked);
 
-        if (SubscriptionManager.isSafari())
-          rawPushSubscription = await this.subscribeSafari();
-        else
+        if (SubscriptionManager.isSafari()) {
+          rawPushSubscription = await this.subscribeSafari()
+          /* Now that permissions have been granted, install the service worker */
+          Log.info("Installing SW on Safari");
+          try {
+            const workerRegistration: ServiceWorkerRegistration = await this.installServiceWorker();
+            Log.info("SW on Safari successfully installed", workerRegistration.active);
+          } catch(e) {
+            Log.error("SW on Safari failed to install.");
+          }
+
+        } else {
           rawPushSubscription = await this.subscribeFcmFromPage(subscriptionStrategy);
+        }
         break;
       default:
         throw new InvalidStateError(InvalidStateReason.UnsupportedEnvironment);
@@ -352,31 +362,35 @@ export class SubscriptionManager {
     }
 
     /* Now that permissions have been granted, install the service worker */
+    const workerRegistration = await this.installServiceWorker();
+    Log.debug('Service worker is ready to continue subscribing.');
+
+    return await this.subscribeWithVapidKey(workerRegistration.pushManager, subscriptionStrategy);
+  }
+
+  private async installServiceWorker(): Promise<ServiceWorkerRegistration> {
     if (await this.context.serviceWorkerManager.shouldInstallWorker()) {
-        try {
-          await this.context.serviceWorkerManager.installWorker();
-        } catch(err) {
-          if (err instanceof ServiceWorkerRegistrationError) {
-            if (err.status === 403) {
-              await this.context.subscriptionManager.registerFailedSubscription(
-                SubscriptionStateKind.ServiceWorkerStatus403, 
-                this.context);
-            } else if (err.status === 404) {
-              await this.context.subscriptionManager.registerFailedSubscription(
-                SubscriptionStateKind.ServiceWorkerStatus404,
-                this.context);
-            } 
+      try {
+        await this.context.serviceWorkerManager.installWorker();
+      } catch(err) {
+        if (err instanceof ServiceWorkerRegistrationError) {
+          if (err.status === 403) {
+            await this.context.subscriptionManager.registerFailedSubscription(
+              SubscriptionStateKind.ServiceWorkerStatus403, 
+              this.context);
+          } else if (err.status === 404) {
+            await this.context.subscriptionManager.registerFailedSubscription(
+              SubscriptionStateKind.ServiceWorkerStatus404,
+              this.context);
           } 
-          throw err;
-        }
+        } 
+        throw err;
+      }
     }
       
 
     Log.debug('Waiting for the service worker to activate...');
-    const workerRegistration = await navigator.serviceWorker.ready;
-    Log.debug('Service worker is ready to continue subscribing.');
-
-    return await this.subscribeWithVapidKey(workerRegistration.pushManager, subscriptionStrategy);
+    return await navigator.serviceWorker.ready;
   }
 
   public async subscribeFcmFromWorker(
