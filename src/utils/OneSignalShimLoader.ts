@@ -23,7 +23,7 @@ export class OneSignalShimLoader {
     if (typeof __DEV__ !== "undefined" && __DEV__) {
       return "https://localhost:3001/sdks/Dev-";
     } else if (typeof __STAGING__ !== "undefined" && __STAGING__) {
-      return `https://${window.location.host}/sdks/Staging-`;
+      return `https://${window.location.host}/sdks/web-sdk/Staging-`;
     }
     return "https://cdn.onesignal.com/sdks/";
   }
