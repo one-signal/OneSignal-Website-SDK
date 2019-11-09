@@ -101,3 +101,7 @@ interface PushSubscription {
    */
   expirationTime?: number;
 }
+
+type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>;
+};
