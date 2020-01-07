@@ -179,7 +179,7 @@ export default class SdkEnvironment {
   static getOrigin(): string {
     if (Environment.isBrowser()) {
       return window.location.origin;
-    } else if (self) {
+    } else if (typeof self !== "undefined" && typeof ServiceWorkerGlobalScope !== "undefined") {
       return self.registration.scope;
     }
     return "Unknown";
