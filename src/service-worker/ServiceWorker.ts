@@ -273,15 +273,17 @@ export class ServiceWorker {
    * @returns {Promise}
    */
   static async sendConfirmedDelivery(notification: any): Promise<Response | null> {
+    if (!notification.rr)
+      return null;
+
     const appId = await ServiceWorker.getAppId();
-    const appConfig = await ConfigHelper.getAppConfig({ appId }, OneSignalApiSW.downloadServerAppConfig);
     const { deviceId } = await Database.getSubscription();
 
     // Decided to exclude deviceId from required params
     // In rare case we don't have it we can still report as confirmed to backend to increment count
     const hasRequiredParams = appId && notification && notification.id;
 
-    if (!hasRequiredParams || !appConfig.receiveReceiptsEnable) {
+    if (!hasRequiredParams) {
       return null;
     }
  
