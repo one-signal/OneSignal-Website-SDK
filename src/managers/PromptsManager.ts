@@ -20,8 +20,8 @@ import {
 import TestHelper from '../helpers/TestHelper';
 import InitHelper, { RegisterOptions } from '../helpers/InitHelper';
 import { SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS } from '../config/index';
-import { wrapSetTimeoutInPromise } from '../helpers/page/WrapSetTimeoutInPromise';
 import { EnvironmentInfoHelper } from '../context/browser/helpers/EnvironmentInfoHelper';
+import { awaitableTimeout } from '../utils/AwaitableTimeout';
 
 export interface AutoPromptOptions {
   force?: boolean;
@@ -133,16 +133,16 @@ export class PromptsManager {
     switch(type){
       case DelayedPromptType.Native:
         if (timeDelaySeconds === 0) {
-          await this.internalShowNativePrompt();
-          break;
+          return this.internalShowNativePrompt();
         }
-        return wrapSetTimeoutInPromise(this.internalShowNativePrompt.bind(this), timeDelaySeconds);
+        await awaitableTimeout(timeDelaySeconds*1000);
+        return this.internalShowNativePrompt();
       case DelayedPromptType.Slidedown:
         if (timeDelaySeconds === 0) {
-          await this.internalShowSlidedownPrompt(options);
-          break;
+          return this.internalShowSlidedownPrompt(options);
         }
-        return wrapSetTimeoutInPromise(this.internalShowSlidedownPrompt.bind(this, options), timeDelaySeconds);
+        await awaitableTimeout(timeDelaySeconds*1000);
+        return this.internalShowSlidedownPrompt(options);
       default:
         Log.error("Invalid Delayed Prompt type");
     }
@@ -152,7 +152,7 @@ export class PromptsManager {
     OneSignalUtils.logMethodCall("internalShowNativePrompt");
 
     if (this.isAutoPromptShowing) {
-      Log.debug("Already showing autopromt. Abort showing a native prompt.");
+      Log.debug("Already showing autoprompt. Abort showing a native prompt.");
       return;
     }
 
