@@ -7,7 +7,11 @@ import SdkEnvironment from "../managers/SdkEnvironment";
 import OneSignalUtils from "../utils/OneSignalUtils";
 import Utils from "../context/shared/utils/Utils";
 import MainHelper from './MainHelper';
-import { SERVER_CONFIG_DEFAULTS_SESSION, SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS } from "../config";
+import {
+  SERVER_CONFIG_DEFAULTS_SESSION,
+  SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS,
+  SERVER_CONFIG_DEFAULTS_SLIDEDOWN
+} from "../config";
 import { AppUserConfigCustomLinkOptions, AppUserConfigPromptOptions } from '../models/Prompts';
 
 export enum IntegrationConfigurationKind {
@@ -185,7 +189,7 @@ export class ConfigHelper {
     wholeUserConfig: AppUserConfig,
     isUsingSubscriptionWorkaround: boolean = false,
   ): AppUserConfigPromptOptions | undefined {
-  
+
     let customlinkUser: AppUserConfigCustomLinkOptions = { enabled: false };
     if (promptOptions && promptOptions.customlink) {
       customlinkUser = promptOptions.customlink;
@@ -253,7 +257,7 @@ export class ConfigHelper {
 
     /**
      * If autoRegister is true, show native prompt for https and slidedown for http ignoring any other related
-     * prompt options. 
+     * prompt options.
      */
     if (wholeUserConfig.autoRegister === true) {
       if (isUsingSubscriptionWorkaround) {
@@ -294,6 +298,16 @@ export class ConfigHelper {
       pageViews: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews,
       timeDelay: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay
     };
+    let positiveUpdateButton, negativeUpdateButton, updateMessage, categories;
+    if (staticPrompts.slidedown.categories) {
+      positiveUpdateButton = Utils.getValueOrDefault(staticPrompts.slidedown.categories.positiveUpdateButton,
+        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.positiveUpdateButton);
+      negativeUpdateButton = Utils.getValueOrDefault(staticPrompts.slidedown.categories.negativeUpdateButton,
+        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.negativeUpdateButton);
+      updateMessage = Utils.getValueOrDefault(staticPrompts.slidedown.categories.updateMessage,
+        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.updateMessage);
+      categories = staticPrompts.slidedown.categories;
+    }
 
     const slidedown = {
       enabled: staticPrompts.slidedown.enabled,
@@ -307,6 +321,10 @@ export class ConfigHelper {
       actionMessage: staticPrompts.slidedown.actionMessage,
       acceptButtonText: staticPrompts.slidedown.acceptButton,
       cancelButtonText: staticPrompts.slidedown.cancelButton,
+      positiveUpdateButton,
+      negativeUpdateButton,
+      updateMessage,
+      categories
     };
     return {
       autoPrompt: native.autoPrompt || slidedown.autoPrompt,
