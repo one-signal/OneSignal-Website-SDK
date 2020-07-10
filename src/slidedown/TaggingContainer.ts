@@ -75,7 +75,7 @@ export default class TaggingContainer {
                 />
                 <span class="${TaggingContainerCssClasses.checkmark}" />
             </label>
-            <div style="clear:both" />`;
+            <div style="clear:both"></div>`;
     }
 
     private get taggingContainer(): Element {
