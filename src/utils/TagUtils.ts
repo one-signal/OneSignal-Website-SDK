@@ -43,7 +43,32 @@ export default class TagUtils {
         });
     }
 
-    static isTagObjectEmpty(tags: TagsObjectForApi): boolean {
+    static isTagObjectEmpty(tags: TagsObjectForApi | TagsObjectWithBoolean): boolean {
         return Object.keys(tags).length > 0;
-    } 
+    }
+
+    /**
+     * Returns checked TagCategory[] using unchecked categories from config
+     * and existingPlayerTags (from `getTags`)
+     * @param  {TagCategory[]} remoteTagCategories
+     * @param  {TagsObjectWithBoolean} existingPlayerTags?
+     */
+    static getCheckedTagCategories(categories: TagCategory[], existingPlayerTags?: TagsObjectWithBoolean)
+        : TagCategory[] {
+            const categoriesCopy: TagCategory[] = JSON.parse(JSON.stringify(categories));
+            if (!existingPlayerTags) {
+                return categories;
+            }
+
+            const isExistingPlayerTagsEmpty = TagUtils.isTagObjectEmpty(existingPlayerTags);
+            if (isExistingPlayerTagsEmpty) {
+                return categories;
+            }
+
+            return categoriesCopy.map(category => {
+                const existingTagValue = existingPlayerTags[category.tag];
+                category.checked = !!existingTagValue;
+                return category;
+            });
+    }
 }
