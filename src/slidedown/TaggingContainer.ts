@@ -7,8 +7,14 @@ import {
     getDomElementOrStub
 } from '../utils';
 import { getLoadingIndicatorWithColor } from './LoadingIndicator';
-import TagUtils from '../utils/TagUtils';
-import { SlidedownCssIds, TaggingContainerCssClasses, TaggingContainerCssIds } from './constants';
+import {
+    SlidedownCssIds,
+    TaggingContainerCssClasses,
+    TaggingContainerCssIds,
+    TaggingContainerStrings,
+    COLORS
+} from './constants';
+import TagUtils from '../../src/utils/TagUtils';
 
 export default class TaggingContainer {
     private html: string = "";
@@ -34,9 +40,9 @@ export default class TaggingContainer {
     public load(): void {
         const loadingContainer = getDomElementOrStub(`#${TaggingContainerCssIds.loadingContainer}`);
         addCssClass(loadingContainer, `${TaggingContainerCssClasses.loadingContainer}`);
-        addDomElement(loadingContainer, 'beforeend', getLoadingIndicatorWithColor('#95A1AC'));
-        addDomElement(loadingContainer, 'beforeend',
-            `<div class="${TaggingContainerCssClasses.loadingMessage}">Fetching your preferences</div>`);
+        addDomElement(loadingContainer, 'beforeend', getLoadingIndicatorWithColor(COLORS.greyLoadingIndicator));
+        addDomElement(loadingContainer, 'beforeend', `<div class="${TaggingContainerCssClasses.loadingMessage}">` +
+            `${TaggingContainerStrings.fetchingPreferences}</div>`);
 
         const allowButton = getDomElementOrStub(`#${SlidedownCssIds.allowButton}`) as HTMLButtonElement;
         allowButton.disabled = true;
@@ -75,7 +81,7 @@ export default class TaggingContainer {
                 />
                 <span class="${TaggingContainerCssClasses.checkmark}" />
             </label>
-            <div style="clear:both" />`;
+            <div style="clear:both"></div>`;
     }
 
     private get taggingContainer(): Element {
