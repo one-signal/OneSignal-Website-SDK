@@ -15,7 +15,7 @@ export default class TaggingContainer {
 
     public mount(remoteTagCategories: Array<TagCategory>, existingPlayerTags?: TagsObjectWithBoolean): void {
         this.html = this.generateHtml(remoteTagCategories, existingPlayerTags);
-        
+
         const body = getDomElementOrStub(`#${SlidedownCssIds.body}`);
         addDomElement(body, 'beforeend', this.html);
 
