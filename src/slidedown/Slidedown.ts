@@ -86,8 +86,8 @@ export default class Slidedown {
       });
 
       // Insert the container
-      addDomElement('body', 'beforeend',
-          `<div id="${SlidedownCssIds.container}" class="${SlidedownCssClasses.container} ${SlidedownCssClasses.reset}"></div>`);
+      addDomElement('body', 'beforeend', `<div id="${SlidedownCssIds.container}"` +
+        `class="${SlidedownCssClasses.container} ${SlidedownCssClasses.reset}"></div>`);
       // Insert the dialog
       addDomElement(this.container, 'beforeend',
           `<div id="${SlidedownCssIds.dialog}" class="${SlidedownCssClasses.dialog}">${dialogHtml}</div>`);
