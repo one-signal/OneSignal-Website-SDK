@@ -1,3 +1,5 @@
+import { Categories } from './Tags';
+
 export enum DelayedPromptType {
   Native = "native",
   Slidedown = "slidedown"
@@ -18,6 +20,12 @@ export interface SlidedownPermissionMessageOptions extends DelayedPromptOptions 
   actionMessage: string;
   acceptButtonText: string;
   cancelButtonText: string;
+  positiveUpdateButton?: string;
+  negativeUpdateButton?: string;
+  savingButtonText?: string;
+  errorButtonText?: string;
+  updateMessage?: string;
+  categories?: Categories;
 }
 
 export interface FullscreenPermissionMessageOptions extends DelayedPromptOptions {
