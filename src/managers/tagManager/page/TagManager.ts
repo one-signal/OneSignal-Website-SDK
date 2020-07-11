@@ -27,7 +27,7 @@ export default class TagManager implements ITagManager {
         const localTagsConvertedToApi = TagUtils.convertTagsBooleansToApi(this.tagsFromTaggingContainer);
         const finalTagsObject = TagUtils.getObjectDifference(localTagsConvertedToApi, this.remoteTags);
 
-        const shouldSendUpdate = TagUtils.isTagObjectEmpty(finalTagsObject);
+        const shouldSendUpdate = !TagUtils.isTagObjectEmpty(finalTagsObject);
         if (shouldSendUpdate) {
             return await OneSignal.sendTags(finalTagsObject) as TagsObjectForApi;
         }
