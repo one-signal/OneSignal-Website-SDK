@@ -30,6 +30,10 @@ export default class TagUtils {
         // Going off local tags since it's our categories. Trying to find only changed tags and returning those
         // as a final object.
         Object.keys(localTags).forEach(key => {
+            if (remoteTags[key] === undefined) {
+                finalTags[key] = localTags[key];
+            }
+
             if (remoteTags[key] && localTags[key] !== remoteTags[key]) {
                 finalTags[key] = localTags[key];
             }
@@ -44,7 +48,7 @@ export default class TagUtils {
     }
 
     static isTagObjectEmpty(tags: TagsObjectForApi | TagsObjectWithBoolean): boolean {
-        return Object.keys(tags).length > 0;
+        return Object.keys(tags).length === 0;
     }
 
     /**
@@ -66,8 +70,8 @@ export default class TagUtils {
             }
 
             return categoriesCopy.map(category => {
-                const existingTagValue = existingPlayerTags[category.tag];
-                category.checked = !!existingTagValue;
+                const existingTagValue: boolean = existingPlayerTags[category.tag];
+                category.checked = existingTagValue === undefined ? true : existingTagValue;
                 return category;
             });
     }
