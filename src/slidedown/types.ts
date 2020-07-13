@@ -1,4 +1,4 @@
-export interface DialogProps {
+export interface SlidedownHtmlProps {
   icon?: string;
   messageText?: string;
   positiveButtonText?: string;

@@ -1,7 +1,7 @@
-import { DialogProps } from "./types";
+import { SlidedownHtmlProps } from "./types";
 import { DEFAULT_ICON } from "./constants";
 
-export function getDialogHtml(dialogProps: DialogProps): string {
+export function getSlidedownHtml(dialogProps: SlidedownHtmlProps): string {
     const { icon, messageText, positiveButtonText, negativeButtonText } = dialogProps;
 
     const finalIcon = icon === 'default-icon' ? DEFAULT_ICON : icon;

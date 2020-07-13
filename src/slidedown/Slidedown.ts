@@ -14,7 +14,7 @@ import {
 import { SlidedownPermissionMessageOptions } from '../models/Prompts';
 import { SERVER_CONFIG_DEFAULTS_SLIDEDOWN } from '../config';
 import { getLoadingIndicatorWithColor } from './LoadingIndicator';
-import { getDialogHtml } from './DialogHtml';
+import { getSlidedownHtml } from './SlidedownHtml';
 import { getRetryIndicator } from './RetryIndicator';
 import { SlidedownCssClasses, SlidedownCssIds, COLORS } from "./constants";
 
@@ -78,7 +78,7 @@ export default class Slidedown {
         this.options.updateMessage : this.options.actionMessage;
 
       const icon = this.getPlatformNotificationIcon();
-      const dialogHtml = getDialogHtml({
+      const slidedownHtml = getSlidedownHtml({
         messageText,
         icon,
         positiveButtonText,
@@ -90,7 +90,7 @@ export default class Slidedown {
         `class="${SlidedownCssClasses.container} ${SlidedownCssClasses.reset}"></div>`);
       // Insert the dialog
       addDomElement(this.container, 'beforeend',
-          `<div id="${SlidedownCssIds.dialog}" class="${SlidedownCssClasses.dialog}">${dialogHtml}</div>`);
+          `<div id="${SlidedownCssIds.dialog}" class="${SlidedownCssClasses.dialog}">${slidedownHtml}</div>`);
 
       // Animate it in depending on environment
       addCssClass(this.container, bowser.mobile ? 'slide-up' : 'slide-down');
