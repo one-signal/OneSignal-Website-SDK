@@ -2,7 +2,7 @@ import { InvalidStateError, InvalidStateReason } from '../errors/InvalidStateErr
 import Event from '../Event';
 import SdkEnvironment from '../managers/SdkEnvironment';
 import Database from '../services/Database';
-import { AppUserConfigPromptOptions, SlidedownPermissionMessageOptions } from '../models/Prompts';
+import { AppUserConfigPromptOptions, SlidedownPermissionMessageOptions, CategorySlidedownOptions } from '../models/Prompts';
 import TimedLocalStorage from '../modules/TimedLocalStorage';
 import Log from '../libraries/Log';
 import { SubscriptionStateKind } from '../models/SubscriptionStateKind';
@@ -125,14 +125,15 @@ export default class MainHelper {
     }
 
     // slidedown prompt options are defined
-
     const { categories } = promptOptions.slidedown;
-    const positiveUpdateButton = !!categories ? categories.positiveUpdateButton :
-      SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.positiveUpdateButton;
-    const negativeUpdateButton = !!categories ? categories.negativeUpdateButton :
-      SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.negativeUpdateButton;
-    const updateMessage = !!categories ? categories.updateMessage :
-      SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.updateMessage;
+    if (!!categories) {
+      categories.positiveUpdateButton = Utils.getValueOrDefault(categories.positiveUpdateButton,
+        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.positiveUpdateButton);
+      categories.negativeUpdateButton = Utils.getValueOrDefault(categories.negativeUpdateButton,
+        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.negativeUpdateButton);
+      categories.updateMessage = Utils.getValueOrDefault(categories.updateMessage,
+        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.updateMessage);
+    }
 
     return {
       enabled: promptOptions.slidedown.enabled,
@@ -140,10 +141,9 @@ export default class MainHelper {
       actionMessage: promptOptions.slidedown.actionMessage || SERVER_CONFIG_DEFAULTS_SLIDEDOWN.actionMessage,
       acceptButtonText: promptOptions.slidedown.acceptButtonText || SERVER_CONFIG_DEFAULTS_SLIDEDOWN.acceptButton,
       cancelButtonText: promptOptions.slidedown.cancelButtonText || SERVER_CONFIG_DEFAULTS_SLIDEDOWN.cancelButton,
-      positiveUpdateButton,
-      negativeUpdateButton,
-      updateMessage
+      categories
     } as SlidedownPermissionMessageOptions;
+
   }
 
   static getFullscreenPermissionMessageOptions(promptOptions: AppUserConfigPromptOptions):
