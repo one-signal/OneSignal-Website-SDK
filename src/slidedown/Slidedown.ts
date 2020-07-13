@@ -17,12 +17,16 @@ import { getLoadingIndicatorWithColor } from './LoadingIndicator';
 import { getSlidedownHtml } from './SlidedownHtml';
 import { getRetryIndicator } from './RetryIndicator';
 import { SlidedownCssClasses, SlidedownCssIds, COLORS } from "./constants";
+import { Categories } from 'src/models/Tags';
+import Log from 'src/libraries/Log';
 
 export default class Slidedown {
   public options: SlidedownPermissionMessageOptions;
   public notificationIcons: NotificationIcons | null;
-  private isInSaveState: boolean;
   public isShowingFailureState: boolean;
+
+  private isInSaveState: boolean;
+  private categoryOptions?: Categories;
 
   static get EVENTS() {
     return {
@@ -38,25 +42,23 @@ export default class Slidedown {
         options = MainHelper.getSlidedownPermissionMessageOptions(OneSignal.config.userConfig.promptOptions);
     }
     this.options = options;
+    this.categoryOptions = options.categories;
     this.options.actionMessage = options.actionMessage.substring(0, 90);
     this.options.acceptButtonText = options.acceptButtonText.substring(0, 15);
     this.options.cancelButtonText = options.cancelButtonText.substring(0, 15);
-    this.options.positiveUpdateButton = options.positiveUpdateButton ?
-      options.positiveUpdateButton.substring(0, 16):
-      SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.positiveUpdateButton;
-    this.options.negativeUpdateButton = options.negativeUpdateButton ?
-      options.negativeUpdateButton.substring(0, 16) :
-      SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.negativeUpdateButton;
-    this.options.updateMessage = !!options.updateMessage ?
-      options.updateMessage.substring(0, 90) :
-      SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.updateMessage;
-    this.options.savingButtonText = SERVER_CONFIG_DEFAULTS_SLIDEDOWN.savingText;
-    // NOTE: will be configurable in the future
-    this.options.errorButtonText = this.options.positiveUpdateButton;
-
     this.notificationIcons = null;
     this.isInSaveState = false;
     this.isShowingFailureState = false;
+
+    if (!!this.categoryOptions) {
+      this.categoryOptions.positiveUpdateButton = this.categoryOptions.positiveUpdateButton.substring(0, 16),
+      this.categoryOptions.negativeUpdateButton = this.categoryOptions.negativeUpdateButton.substring(0, 16),
+      this.categoryOptions.updateMessage = this.categoryOptions.updateMessage.substring(0, 90),
+
+        // NOTE: will be configurable in the future
+      this.categoryOptions.savingButtonText = SERVER_CONFIG_DEFAULTS_SLIDEDOWN.savingText;
+      this.categoryOptions.errorButtonText = this.categoryOptions.positiveUpdateButton;
+    }
   }
 
   async create(isInUpdateMode?: boolean) {
@@ -70,12 +72,12 @@ export default class Slidedown {
       if (this.container.className.includes(SlidedownCssClasses.container)) {
           removeDomElement(`#${SlidedownCssIds.container}`);
       }
-      const positiveButtonText = isInUpdateMode ?
-        this.options.positiveUpdateButton : this.options.acceptButtonText;
-      const negativeButtonText = isInUpdateMode ?
-        this.options.negativeUpdateButton : this.options.cancelButtonText;
-      const messageText = isInUpdateMode ?
-        this.options.updateMessage : this.options.actionMessage;
+      const positiveButtonText = isInUpdateMode && !!this.categoryOptions ?
+        this.categoryOptions.positiveUpdateButton : this.options.acceptButtonText;
+      const negativeButtonText = isInUpdateMode && !!this.categoryOptions ?
+        this.categoryOptions.negativeUpdateButton : this.options.cancelButtonText;
+      const messageText = isInUpdateMode && !!this.categoryOptions ?
+        this.categoryOptions.updateMessage : this.options.actionMessage;
 
       const icon = this.getPlatformNotificationIcon();
       const slidedownHtml = getSlidedownHtml({
@@ -128,9 +130,11 @@ export default class Slidedown {
    * only used with Category Slidedown
    */
   toggleSaveState() {
+    if (!this.isPrivateCategoryOptionsConfigured()) return;
+
     if (!this.isInSaveState) {
       // note: savingButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
-      this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.options.savingButtonText!);
+      this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.categoryOptions!.savingButtonText!);
       addDomElement(this.buttonIndicatorHolder, 'beforeend',
         getLoadingIndicatorWithColor(COLORS.whiteLoadingIndicator));
       (<HTMLButtonElement>this.allowButton).disabled = true;
@@ -138,7 +142,7 @@ export default class Slidedown {
       addCssClass(this.allowButton, SlidedownCssClasses.savingStateButton);
     } else {
       // positiveUpdateButton should be defined as written in MainHelper.getSlidedownPermissionMessageOptions
-      this.allowButton.innerHTML = this.options.positiveUpdateButton!;
+      this.allowButton.innerHTML = this.categoryOptions!.positiveUpdateButton!;
       removeDomElement(`#${SlidedownCssClasses.buttonIndicatorHolder}`);
       (<HTMLButtonElement>this.allowButton).disabled = false;
       removeCssClass(this.allowButton, 'disabled');
@@ -148,9 +152,11 @@ export default class Slidedown {
   }
 
   toggleFailureState() {
+    if (!this.isPrivateCategoryOptionsConfigured()) return;
+
     if (!this.isShowingFailureState) {
       // note: errorButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
-      this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.options.errorButtonText!);
+      this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.categoryOptions!.errorButtonText);
       addDomElement(this.buttonIndicatorHolder, 'beforeend', getRetryIndicator());
       addCssClass(this.allowButton, 'onesignal-error-state-button');
     } else {
@@ -167,6 +173,16 @@ export default class Slidedown {
   getIndicatorHolderHtmlWithText(text: string) {
     return `${text}<div id="${SlidedownCssIds.buttonIndicatorHolder}"` +
       `class="${SlidedownCssClasses.buttonIndicatorHolder}"></div>`;
+  }
+
+  // extra check that makes sure that class member categoryOptions is indeed defined
+  // used for certain functions that are unique only to Category Slidedown
+  isPrivateCategoryOptionsConfigured(): boolean {
+    if (!this.categoryOptions) {
+      Log.debug("Slidedown private member `categoryOptions` undefined");
+      return false;
+    }
+    return true;
   }
 
   get container() {
