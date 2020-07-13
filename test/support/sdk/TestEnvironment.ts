@@ -41,7 +41,7 @@ import TagManager from '../../../src/managers/tagManager/page/TagManager';
 import { DynamicResourceLoader, ResourceLoadState } from '../../../src/services/DynamicResourceLoader';
 import { SinonSandbox } from 'sinon';
 import { ServiceWorkerManager } from '../../../src/managers/ServiceWorkerManager';
-import { SlidedownCssIds } from 'src/slidedown/constants';
+import { SlidedownCssIds } from '../../../src/slidedown/constants';
 
 // NodeJS.Global
 declare var global: any;
