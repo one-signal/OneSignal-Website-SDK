@@ -15,17 +15,14 @@ export interface DelayedPromptOptions extends BasePromptOptions {
   pageViews?: number;
 }
 
+export interface CategorySlidedownOptions extends DelayedPromptOptions {
+  categories?: Categories;
+}
 
-export interface SlidedownPermissionMessageOptions extends DelayedPromptOptions {
+export interface SlidedownPermissionMessageOptions extends CategorySlidedownOptions {
   actionMessage: string;
   acceptButtonText: string;
   cancelButtonText: string;
-  positiveUpdateButton?: string;
-  negativeUpdateButton?: string;
-  savingButtonText?: string;
-  errorButtonText?: string;
-  updateMessage?: string;
-  categories?: Categories;
 }
 
 export interface FullscreenPermissionMessageOptions extends DelayedPromptOptions {
