@@ -12,8 +12,10 @@ export type TagsObjectWithBoolean = TagsObject<boolean>;
 export type TagsObjectForApi = TagsObject<PossibleTagValueValues>;
 
 export interface Categories {
-    positiveUpdateButton?: string;
-    negativeUpdateButton?: string;
-    updateMessage?: string;
+    positiveUpdateButton: string;
+    negativeUpdateButton: string;
+    savingButtonText: string;
+    errorButtonText: string;
+    updateMessage: string;
     tags: TagCategory[];
 }
