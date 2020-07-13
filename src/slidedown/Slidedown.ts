@@ -131,7 +131,8 @@ export default class Slidedown {
     if (!this.isInSaveState) {
       // note: savingButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
       this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.options.savingButtonText!);
-      addDomElement(this.buttonIndicatorHolder, 'beforeend', getLoadingIndicatorWithColor(COLORS.loadingIndicator));
+      addDomElement(this.buttonIndicatorHolder, 'beforeend',
+        getLoadingIndicatorWithColor(COLORS.whiteLoadingIndicator));
       (<HTMLButtonElement>this.allowButton).disabled = true;
       addCssClass(this.allowButton, 'disabled');
       addCssClass(this.allowButton, SlidedownCssClasses.savingStateButton);
