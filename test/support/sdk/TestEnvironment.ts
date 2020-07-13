@@ -386,7 +386,7 @@ export class TestEnvironment {
   }
 
   static mockInternalOneSignal(config?: TestEnvironmentConfig) {
-    config = config || { 
+    config = config || {
       httpOrHttps: HttpHttpsEnvironment.Https,
       integration: ConfigIntegrationKind.Custom,
     };
