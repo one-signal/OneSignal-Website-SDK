@@ -183,6 +183,14 @@ export class ConfigHelper {
     };
   }
 
+  /**
+   * Used for Custom Code Integration Type
+   * @param  {AppUserConfigPromptOptions|undefined} promptOptions
+   * @param  {ServerAppConfigPrompt} defaultsFromServer
+   * @param  {AppUserConfig} wholeUserConfig
+   * @param  {boolean=false} isUsingSubscriptionWorkaround
+   * @returns AppUserConfigPromptOptions
+   */
   public static injectDefaultsIntoPromptOptions(
     promptOptions: AppUserConfigPromptOptions | undefined,
     defaultsFromServer: ServerAppConfigPrompt,
@@ -282,7 +290,11 @@ export class ConfigHelper {
 
     return promptOptionsConfig;
   }
-
+  /**
+   * Used only with Dashboard Configuration
+   * @param  {ServerAppConfig} serverConfig
+   * @returns AppUserConfigPromptOptions
+   */
   private static getPromptOptionsForDashboardConfiguration(serverConfig: ServerAppConfig): AppUserConfigPromptOptions {
     const staticPrompts = serverConfig.config.staticPrompts;
     const native = staticPrompts.native ? {
@@ -298,14 +310,8 @@ export class ConfigHelper {
       pageViews: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews,
       timeDelay: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay
     };
-    let positiveUpdateButton, negativeUpdateButton, updateMessage, categories;
+    let categories;
     if (staticPrompts.slidedown.categories) {
-      positiveUpdateButton = Utils.getValueOrDefault(staticPrompts.slidedown.categories.positiveUpdateButton,
-        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.positiveUpdateButton);
-      negativeUpdateButton = Utils.getValueOrDefault(staticPrompts.slidedown.categories.negativeUpdateButton,
-        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.negativeUpdateButton);
-      updateMessage = Utils.getValueOrDefault(staticPrompts.slidedown.categories.updateMessage,
-        SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.updateMessage);
       categories = staticPrompts.slidedown.categories;
     }
 
@@ -321,9 +327,6 @@ export class ConfigHelper {
       actionMessage: staticPrompts.slidedown.actionMessage,
       acceptButtonText: staticPrompts.slidedown.acceptButton,
       cancelButtonText: staticPrompts.slidedown.cancelButton,
-      positiveUpdateButton,
-      negativeUpdateButton,
-      updateMessage,
       categories
     };
     return {
