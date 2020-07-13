@@ -12,6 +12,7 @@ import {
   SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS
 } from "../config";
 import { AppUserConfigCustomLinkOptions, AppUserConfigPromptOptions } from '../models/Prompts';
+import TagUtils from '../../src/utils/TagUtils';
 
 export enum IntegrationConfigurationKind {
   /**
@@ -311,7 +312,7 @@ export class ConfigHelper {
     };
     let categories;
     if (staticPrompts.slidedown.categories) {
-      categories = staticPrompts.slidedown.categories;
+      categories = TagUtils.limitCategoriesToMaxCount(staticPrompts.slidedown.categories, 10);
     }
 
     const slidedown = {
