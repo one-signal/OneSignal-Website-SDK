@@ -1,4 +1,5 @@
 import { TagsObjectForApi, TagsObjectWithBoolean, TagCategory } from '../models/Tags';
+import { deepCopy } from '../../src/utils';
 
 export default class TagUtils {
     static convertTagsApiToBooleans(tags: TagsObjectForApi): TagsObjectWithBoolean {
@@ -59,7 +60,6 @@ export default class TagUtils {
      */
     static getCheckedTagCategories(categories: TagCategory[], existingPlayerTags?: TagsObjectWithBoolean)
         : TagCategory[] {
-            const categoriesCopy: TagCategory[] = JSON.parse(JSON.stringify(categories));
             if (!existingPlayerTags) {
                 return categories;
             }
@@ -69,6 +69,7 @@ export default class TagUtils {
                 return categories;
             }
 
+            const categoriesCopy = deepCopy<TagCategory[]>(categories);
             return categoriesCopy.map(category => {
                 const existingTagValue: boolean = existingPlayerTags[category.tag];
                 category.checked = existingTagValue === undefined ? true : existingTagValue;
