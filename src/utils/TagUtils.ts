@@ -50,11 +50,9 @@ export default class TagUtils {
     static isTagObjectEmpty(tags: TagsObjectForApi | TagsObjectWithBoolean): boolean {
         return Object.keys(tags).length === 0;
     }
-
     /**
-     * Returns checked TagCategory[] using unchecked categories from config
-     * and existingPlayerTags (from `getTags`)
-     * @param  {TagCategory[]} remoteTagCategories
+     * Uses configured categories and remote player tags to calculate which boxes should be checked
+     * @param  {TagCategory[]} categories
      * @param  {TagsObjectWithBoolean} existingPlayerTags?
      */
     static getCheckedTagCategories(categories: TagCategory[], existingPlayerTags?: TagsObjectWithBoolean)
@@ -75,6 +73,7 @@ export default class TagUtils {
                 return category;
             });
     }
+
     static getCheckedStatusForTagValue(tagValue: boolean | undefined): boolean {
         // If user does not have tag assigned to them, consider it selected
         if (tagValue === undefined) {
