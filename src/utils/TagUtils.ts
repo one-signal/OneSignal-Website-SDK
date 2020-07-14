@@ -31,13 +31,12 @@ export default class TagUtils {
         // Going off local tags since it's our categories. Trying to find only changed tags and returning those
         // as a final object.
         Object.keys(localTags).forEach(key => {
-            if (remoteTags[key] === undefined) {
-                finalTags[key] = localTags[key];
+            // only if user's tag value did not change, skip it
+            if (remoteTags[key] === localTags[key]) {
+                return;
             }
 
-            if (remoteTags[key] && localTags[key] !== remoteTags[key]) {
-                finalTags[key] = localTags[key];
-            }
+            finalTags[key] = localTags[key];
         });
         return finalTags;
     }
