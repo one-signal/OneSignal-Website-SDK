@@ -19,6 +19,7 @@ import { getRetryIndicator } from './RetryIndicator';
 import { SlidedownCssClasses, SlidedownCssIds, COLORS } from "./constants";
 import { Categories } from 'src/models/Tags';
 import Log from 'src/libraries/Log';
+import TagUtils from 'src/utils/TagUtils';
 
 export default class Slidedown {
   public options: SlidedownPermissionMessageOptions;
@@ -26,7 +27,7 @@ export default class Slidedown {
   public isShowingFailureState: boolean;
 
   private isInSaveState: boolean;
-  private categoryOptions?: Categories;
+  private categoryOptions: Categories|undefined;
 
   static get EVENTS() {
     return {
@@ -130,7 +131,10 @@ export default class Slidedown {
    * only used with Category Slidedown
    */
   toggleSaveState() {
-    if (!this.isPrivateCategoryOptionsConfigured()) return;
+    if (!this.categoryOptions) {
+      Log.debug("Slidedown private category options are not defined");
+      return;
+    }
 
     if (!this.isInSaveState) {
       // note: savingButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
@@ -152,7 +156,10 @@ export default class Slidedown {
   }
 
   toggleFailureState() {
-    if (!this.isPrivateCategoryOptionsConfigured()) return;
+    if (!this.categoryOptions) {
+      Log.debug("Slidedown private category options are not defined");
+      return;
+    }
 
     if (!this.isShowingFailureState) {
       // note: errorButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
@@ -173,16 +180,6 @@ export default class Slidedown {
   getIndicatorHolderHtmlWithText(text: string) {
     return `${text}<div id="${SlidedownCssIds.buttonIndicatorHolder}"` +
       `class="${SlidedownCssClasses.buttonIndicatorHolder}"></div>`;
-  }
-
-  // extra check that makes sure that class member categoryOptions is indeed defined
-  // used for certain functions that are unique only to Category Slidedown
-  isPrivateCategoryOptionsConfigured(): boolean {
-    if (!this.categoryOptions) {
-      Log.debug("Slidedown private member `categoryOptions` undefined");
-      return false;
-    }
-    return true;
   }
 
   get container() {
