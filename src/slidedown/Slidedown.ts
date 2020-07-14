@@ -14,7 +14,7 @@ import {
 import { SlidedownPermissionMessageOptions } from '../models/Prompts';
 import { SERVER_CONFIG_DEFAULTS_SLIDEDOWN } from '../config';
 import { getLoadingIndicatorWithColor } from './LoadingIndicator';
-import { getSlidedownHtml } from './SlidedownHtml';
+import { getDialogHtml } from './DialogHtml';
 import { getRetryIndicator } from './RetryIndicator';
 import { SlidedownCssClasses, SlidedownCssIds, COLORS } from "./constants";
 import { Categories } from 'src/models/Tags';
@@ -93,7 +93,7 @@ export default class Slidedown {
         `class="${SlidedownCssClasses.container} ${SlidedownCssClasses.reset}"></div>`);
       // Insert the dialog
       addDomElement(this.container, 'beforeend',
-          `<div id="${SlidedownCssIds.dialog}" class="${SlidedownCssClasses.dialog}">${slidedownHtml}</div>`);
+          `<div id="${SlidedownCssIds.dialog}" class="${SlidedownCssClasses.dialog}">${dialogHtml}</div>`);
 
       // Animate it in depending on environment
       addCssClass(this.container, bowser.mobile ? 'slide-up' : 'slide-down');
