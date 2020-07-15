@@ -84,7 +84,8 @@ export default class TagUtils {
     }
 
     static limitCategoriesToMaxCount(categories: Categories, max: number): Categories {
-        categories.tags = categories.tags.slice(0, max);
-        return categories;
+        const categoriesCopy = deepCopy(categories);
+        categoriesCopy.tags = categories.tags.slice(0, max);
+        return categoriesCopy;
     }
 }
