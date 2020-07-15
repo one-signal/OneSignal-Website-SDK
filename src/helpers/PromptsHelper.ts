@@ -1,14 +1,12 @@
+import { ContextInterface } from '../../src/models/Context';
+
 export default class PromptsHelper {
-  static isCategorySlidedownConfigured(): boolean {
-    const { promptOptions } = OneSignal.context.appConfig.userConfig;
-    if (!promptOptions) {
+  static isCategorySlidedownConfigured(context: ContextInterface): boolean {
+    const { promptOptions } = context.appConfig.userConfig;
+    if (!promptOptions || !promptOptions.slidedown || !promptOptions.slidedown.categories) {
       return false;
     }
 
-    const isUsingCategoryOptions = !!promptOptions && !!promptOptions.slidedown && !!promptOptions.slidedown.categories;
-    return (
-      isUsingCategoryOptions &&
-      !!promptOptions.slidedown!.categories!.tags &&
-      promptOptions.slidedown!.categories!.tags.length > 0);
+    return (!!promptOptions.slidedown.categories.tags && promptOptions.slidedown.categories.tags.length > 0);
   }
 }
