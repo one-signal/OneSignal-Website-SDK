@@ -237,6 +237,11 @@ export class ConfigHelper {
           SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews);
         promptOptionsConfig.slidedown.timeDelay = Utils.getValueOrDefault(promptOptionsConfig.slidedown.timeDelay,
           SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay);
+
+      if (promptOptionsConfig.slidedown.categories) {
+        const { categories } = promptOptionsConfig.slidedown;
+        promptOptionsConfig.slidedown.categories = TagUtils.limitCategoriesToMaxCount(categories, 10);
+      }
     } else {
       promptOptionsConfig.slidedown = MainHelper.getSlidedownPermissionMessageOptions(promptOptionsConfig);
       promptOptionsConfig.slidedown.enabled = false;
