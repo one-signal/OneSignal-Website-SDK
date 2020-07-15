@@ -378,7 +378,6 @@ export default class OneSignal {
     const isPushEnabled = await OneSignal.privateIsPushNotificationsEnabled();
     await OneSignal.context.promptsManager.internalShowCategorySlidedown({
       ...options,
-      force: true,
       isInUpdateMode: isPushEnabled
     });
   }
