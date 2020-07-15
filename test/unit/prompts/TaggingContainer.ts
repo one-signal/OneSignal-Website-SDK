@@ -64,10 +64,16 @@ test('check that calling load() adds the loading container to DOM', t => {
   t.true(loadingContainer.classList.length > 0);
 });
 
+test('check that calling getValuesFromTaggingContainer returns correct list of tags', t => {
+  const taggingContainer = new TaggingContainer();
+  const categoryArr = [{ tag: "tag1", label: "label1" }];
 
-test.todo('check that clicking a checkbox toggles the checked state of category input');
-test.todo('check generateHtml() returns correct HTML with given categories and player tags');
-test.todo('check that calling getValuesFromTaggingContainer returns correct list of tags');
+  TagUtils.markAllTagsAsSpecified(categoryArr, true);
+  taggingContainer.mount(categoryArr, {});
+
+  const tags: TagsObjectWithBoolean = TaggingContainer.getValuesFromTaggingContainer();
+  t.true(_.isEqual(tags, { tag1: true }));
+});
 
 /*
 TODO: uncomment after WebAPI dom element creation is implemented for sanitization purposes
@@ -76,14 +82,15 @@ test('check sanitization is working correctly', t => {
   setUserAgent(BrowserUserAgent.ChromeMacSupported);
   OneSignal.slidedown = new Slidedown();
   const tagCategoryList = [{
-      tag: "tag1\"<script> // injected code </script> \"\"",
-      label: "Tag 1\"<script> // injected code </script> \"",
+    tag: "tag1\"<script> // injected code </script> \"\"",
+    label: "Tag 1\"<script> // injected code </script> \"",
   }];
   const taggingContainer = new TaggingContainer();
   taggingContainer.mount(tagCategoryList);
   const labelElement = getDomElementOrStub(".onesignal-category-label");
   t.is(labelElement.innerHTML, `<span class="onesignal-category-label-text">Tag 1</span>`+
-    `<input type="checkbox" value="tag1"><span class="onesignal-checkmark"></span>`);
+  `<input type="checkbox" value="tag1"><span class="onesignal-checkmark"></span>`);
 });
 */
+test.todo('check generateHtml() returns correct HTML with given categories and player tags');
 test.todo('check sanitization is working correctly');
