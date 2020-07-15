@@ -203,7 +203,7 @@ export class PromptsManager {
 
     OneSignal.slidedown = new Slidedown(slideDownOptions);
     try {
-      if (PromptsHelper.isCategorySlidedownConfigured()) {
+      if (PromptsHelper.isCategorySlidedownConfigured(this.context)) {
         // show slidedown with tagging container
         await OneSignal.slidedown.create(isInUpdateMode);
         let tagsForComponent: TagsObjectWithBoolean = {};
@@ -236,8 +236,9 @@ export class PromptsManager {
     const promptOptions = await this.context.appConfig.userConfig.promptOptions;
     const categoryOptions = promptOptions!.slidedown!.categories;
 
-    if (!PromptsHelper.isCategorySlidedownConfigured()) {
-      Log.error("OneSignal: no categories to display. Check your configuration on the OneSignal dashboard or your custom code initialization.");
+    if (!PromptsHelper.isCategorySlidedownConfigured(this.context)) {
+      Log.error(`OneSignal: no categories to display. Check your configuration on the ` +
+        `OneSignal dashboard or your custom code initialization.`);
       return;
     }
 
