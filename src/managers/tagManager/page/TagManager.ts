@@ -31,7 +31,7 @@ export default class TagManager implements ITagManager {
         if (shouldSendUpdate) {
             return await OneSignal.sendTags(finalTagsObject) as TagsObjectForApi;
         }
-        Log.warn("OneSignal: no change detected in Category preferences. Abort tag update.");
+        Log.warn("OneSignal: no change detected in Category preferences. Skipping tag update.");
         // no change detected, return {}
         return finalTagsObject;
     }
