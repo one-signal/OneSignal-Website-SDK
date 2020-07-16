@@ -13,6 +13,7 @@ import {
 } from "../config";
 import { AppUserConfigCustomLinkOptions, AppUserConfigPromptOptions } from '../models/Prompts';
 import TagUtils from '../../src/utils/TagUtils';
+import { Categories } from '../../src/models/Tags';
 
 export enum IntegrationConfigurationKind {
   /**
@@ -315,7 +316,7 @@ export class ConfigHelper {
       pageViews: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews,
       timeDelay: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay
     };
-    let categories;
+    let categories: Categories;
     if (staticPrompts.slidedown.categories) {
       categories = TagUtils.limitCategoriesToMaxCount(staticPrompts.slidedown.categories, 10);
     }
