@@ -66,7 +66,8 @@ export default class TaggingContainer {
         });
         innerHtml += "</div>";
 
-        return `<div class="${TaggingContainerCssClasses.taggingContainer}">${innerHtml}</div>`;
+        return `<div id=${TaggingContainerCssIds.taggingContainer}` +
+            ` class="${TaggingContainerCssClasses.taggingContainer}">${innerHtml}</div>`;
     }
 
     private getCategoryLabelHtml(tagCategory: TagCategory): string {
