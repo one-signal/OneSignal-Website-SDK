@@ -1,6 +1,5 @@
 import test from "ava";
 import TagUtils from '../../../src/utils/TagUtils';
-import _ from "lodash";
 import sinon, { SinonSandbox } from "sinon";
 import { TestEnvironment } from '../../support/sdk/TestEnvironment';
 import { TagCategory, TagsObjectForApi, TagsObjectWithBoolean, Categories } from '../../../src/models/Tags';
@@ -19,12 +18,12 @@ test.afterEach(() => {
 
 test('check conversion from tag boolean values to number strings', t => {
     const converted = TagUtils.convertTagsBooleansToApi({ tag1: false, tag2: true });
-    t.true(_.isEqual(converted, { tag1: "0", tag2: "1" }));
+    t.deepEqual(converted, { tag1: "0", tag2: "1" });
 });
 
 test('check conversion from tag string values to booleans', t => {
     const converted = TagUtils.convertTagsApiToBooleans({ tag1: "1", tag2: "0" });
-    t.true(_.isEqual(converted, { tag1: true, tag2: false }));
+    t.deepEqual(converted, { tag1: true, tag2: false });
 });
 
 test('check correct object difference is returned', t => {
@@ -44,10 +43,10 @@ test('check correct object difference is returned', t => {
     playerTags = { tag2: "1" };
     const diff4 = TagUtils.getObjectDifference(localTags, playerTags);
 
-    t.true(_.isEqual(diff1, { tag1: "1", tag2: "0" }));
-    t.true(_.isEqual(diff2, { tag1: "0" }));
-    t.true(_.isEqual(diff3, { tag1: "1" }));
-    t.true(_.isEqual(diff4, {}));
+    t.deepEqual(diff1, { tag1: "1", tag2: "0" });
+    t.deepEqual(diff2, { tag1: "0" });
+    t.deepEqual(diff3, { tag1: "1" });
+    t.deepEqual(diff4, {});
 });
 
 
@@ -76,11 +75,11 @@ test('check that getCheckedTagCategories returns correct tagCategory list', t =>
 
     const existingPlayerTags: TagsObjectWithBoolean = { tag1: true, tag2: false, tag3: true };
     const checked = TagUtils.getCheckedTagCategories(configuredCategories, existingPlayerTags);
-    t.true(_.isEqual(checked, [
+    t.deepEqual(checked, [
         { tag: "tag1", label: "label1", checked: true },
         { tag: "tag2", label: "label2", checked: false },
         { tag: "tag3", label: "label3", checked: true }
-    ]));
+    ]);
 });
 
 test('check that getCheckedTagCategories defaults values to true if not an existing player tag', t => {
@@ -92,11 +91,11 @@ test('check that getCheckedTagCategories defaults values to true if not an exist
 
     const existingPlayerTags: TagsObjectWithBoolean = { tag1: false };
     const checked = TagUtils.getCheckedTagCategories(configuredCategories, existingPlayerTags);
-    t.true(_.isEqual(checked, [
+    t.deepEqual(checked, [
         { tag: "tag1", label: "label1", checked: false },
         { tag: "tag2", label: "label2", checked: true },
         { tag: "tag3", label: "label3", checked: true }
-    ]));
+    ]);
 });
 
 test('check that getCheckedStatusForTagValue defaults undefined tag values to true', t => {
@@ -132,10 +131,10 @@ test('check that limitCategoriesToMaxCount returns correct category object', t =
     const limitedUnder = TagUtils.limitCategoriesToMaxCount(categoriesUnderMaxTags, maxCount);
     const limitedOver = TagUtils.limitCategoriesToMaxCount(categoriesOverMaxTags, maxCount);
 
-    t.true(_.isEqual(limitedUnder.tags, [{ tag: "tag", label: "label" }]));
-    t.true(_.isEqual(limitedOver.tags, [
+    t.deepEqual(limitedUnder.tags, [{ tag: "tag", label: "label" }]);
+    t.deepEqual(limitedOver.tags, [
         { tag: "tag", label: "label" },
         { tag: "tag2", label: "label2" },
         { tag: "tag3", label: "label3" },
-    ]));
+    ]);
 });
