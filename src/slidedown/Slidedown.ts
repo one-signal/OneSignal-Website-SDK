@@ -25,7 +25,6 @@ export default class Slidedown {
   public notificationIcons: NotificationIcons | null;
   public isShowingFailureState: boolean;
 
-  private isInSaveState: boolean;
   private categoryOptions: Categories|undefined;
 
   static get EVENTS() {
@@ -47,7 +46,6 @@ export default class Slidedown {
     this.options.acceptButtonText = options.acceptButtonText.substring(0, 15);
     this.options.cancelButtonText = options.cancelButtonText.substring(0, 15);
     this.notificationIcons = null;
-    this.isInSaveState = false;
     this.isShowingFailureState = false;
 
     if (!!this.categoryOptions) {
@@ -129,38 +127,37 @@ export default class Slidedown {
   /**
    * only used with Category Slidedown
    */
-  toggleSaveState() {
+  setSaveState(state: boolean) {
     if (!this.categoryOptions) {
       Log.debug("Slidedown private category options are not defined");
       return;
     }
 
-    if (!this.isInSaveState) {
+    if (state) {
       // note: savingButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
       this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.categoryOptions!.savingButtonText!);
       addDomElement(this.buttonIndicatorHolder, 'beforeend',
         getLoadingIndicatorWithColor(COLORS.whiteLoadingIndicator));
-      (<HTMLButtonElement>this.allowButton).disabled = true;
+      this.allowButton.disabled = true;
       addCssClass(this.allowButton, 'disabled');
       addCssClass(this.allowButton, SlidedownCssClasses.savingStateButton);
     } else {
       // positiveUpdateButton should be defined as written in MainHelper.getSlidedownPermissionMessageOptions
       this.allowButton.innerHTML = this.categoryOptions!.positiveUpdateButton!;
       removeDomElement(`#${SlidedownCssClasses.buttonIndicatorHolder}`);
-      (<HTMLButtonElement>this.allowButton).disabled = false;
+      this.allowButton.disabled = false;
       removeCssClass(this.allowButton, 'disabled');
       removeCssClass(this.allowButton, SlidedownCssClasses.savingStateButton);
     }
-    this.isInSaveState = !this.isInSaveState;
   }
 
-  toggleFailureState() {
+  setFailureState(state: boolean) {
     if (!this.categoryOptions) {
       Log.debug("Slidedown private category options are not defined");
       return;
     }
 
-    if (!this.isShowingFailureState) {
+    if (state) {
       // note: errorButtonText is hardcoded in constructor. TODO: pull from config & set defaults for future release
       this.allowButton.innerHTML = this.getIndicatorHolderHtmlWithText(this.categoryOptions!.errorButtonText);
       addDomElement(this.buttonIndicatorHolder, 'beforeend', getRetryIndicator());
@@ -169,7 +166,7 @@ export default class Slidedown {
       removeDomElement('#onesignal-button-indicator-holder');
       removeCssClass(this.allowButton, 'onesignal-error-state-button');
     }
-    this.isShowingFailureState = !this.isShowingFailureState;
+    this.isShowingFailureState = state;
   }
 
   getPlatformNotificationIcon(): string {
@@ -190,11 +187,11 @@ export default class Slidedown {
   }
 
   get allowButton() {
-    return getDomElementOrStub(`#${SlidedownCssIds.allowButton}`);
+    return getDomElementOrStub(`#${SlidedownCssIds.allowButton}`) as HTMLButtonElement;
   }
 
   get cancelButton() {
-    return getDomElementOrStub(`#${SlidedownCssIds.cancelButton}`);
+    return getDomElementOrStub(`#${SlidedownCssIds.cancelButton}`) as HTMLButtonElement;
   }
 
   get buttonIndicatorHolder() {
