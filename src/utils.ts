@@ -414,7 +414,7 @@ export function getPlatformNotificationIcon(notificationIcons: NotificationIcons
 export function getDomElementOrStub(selector: string): Element {
   const foundElement = document.querySelector(selector);
   if (!foundElement) {
-    Log.info(`No instance of ${selector} found. Returning stub.`);
+    Log.debug(`No instance of ${selector} found. Returning stub.`);
     return document.createElement('div');
   }
   return foundElement;
