@@ -57,6 +57,7 @@ import { SessionManager } from './managers/sessionManager/page/SessionManager';
 import OutcomesHelper from "./helpers/shared/OutcomesHelper";
 import { OutcomeAttributionType, SentUniqueOutcome } from "./models/Outcomes";
 import { DelayedPromptType, AppUserConfigNotifyButton } from './models/Prompts';
+import LocalStorage from './utils/LocalStorage';
 
 export default class OneSignal {
   /**
@@ -375,7 +376,7 @@ export default class OneSignal {
 
   public static async showCategorySlidedown(options?: AutoPromptOptions): Promise<void> {
     await awaitOneSignalInitAndSupported();
-    const isPushEnabled = await OneSignal.privateIsPushNotificationsEnabled();
+    const isPushEnabled = LocalStorage.getIsPushNotificationsEnabled();
     await OneSignal.context.promptsManager.internalShowCategorySlidedown({
       ...options,
       isInUpdateMode: isPushEnabled
