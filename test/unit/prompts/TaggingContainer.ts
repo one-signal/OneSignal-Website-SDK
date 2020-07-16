@@ -2,11 +2,8 @@ import test from 'ava';
 import TaggingContainer from '../../../src/slidedown/TaggingContainer';
 import sinon, { SinonSandbox } from 'sinon';
 import { TestEnvironment, HttpHttpsEnvironment, BrowserUserAgent } from '../../support/sdk/TestEnvironment';
-import { setUserAgent } from '../../support/tester/browser';
-import Slidedown from '../../../src/slidedown/Slidedown';
-import { TagCategory, TagsObjectWithBoolean } from '../../../src/models/Tags';
-import _ from "lodash";
-import { getDomElementOrStub, deepCopy } from '../../../src/utils';
+import { TagsObjectWithBoolean } from '../../../src/models/Tags';
+import { getDomElementOrStub } from '../../../src/utils';
 import TagUtils from '../../../src/utils/TagUtils';
 import { TaggingContainerCssIds, SlidedownCssClasses } from '../../../src/slidedown/constants';
 
@@ -72,7 +69,7 @@ test('check that calling getValuesFromTaggingContainer returns correct list of t
   taggingContainer.mount(categoryArr, {});
 
   const tags: TagsObjectWithBoolean = TaggingContainer.getValuesFromTaggingContainer();
-  t.true(_.isEqual(tags, { tag1: true }));
+  t.deepEqual(tags, { tag1: true });
 });
 
 /*
