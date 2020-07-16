@@ -261,7 +261,7 @@ export class PromptsManager {
     OneSignal.emitter.on(Slidedown.EVENTS.ALLOW_CLICK, async () => {
       const { slidedown } = OneSignal;
       if (slidedown.isShowingFailureState) {
-        slidedown.toggleFailureState();
+        slidedown.setFailureState(false);
       }
       const tags = TaggingContainer.getValuesFromTaggingContainer();
       this.context.tagManager.storeTagValuesToUpdate(tags);
@@ -269,15 +269,15 @@ export class PromptsManager {
       const isPushEnabled: boolean = LocalStorage.getIsPushNotificationsEnabled();
 
       if (isPushEnabled) {
-        OneSignal.slidedown.toggleSaveState();
+        OneSignal.slidedown.setSaveState(true);
         // Sync Category Slidedown tags (isInUpdateMode = true)
         try {
           await this.context.tagManager.sendTags(true);
         } catch (e) {
           Log.error("Failed to update tags", e);
           // Display tag update error
-          OneSignal.slidedown.toggleSaveState();
-          OneSignal.slidedown.toggleFailureState();
+          OneSignal.slidedown.setSaveState(false);
+          OneSignal.slidedown.setFailureState(true);
           return;
         }
       } else {
