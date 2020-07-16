@@ -33,6 +33,7 @@ export const TaggingContainerCssClasses = {
 
 export const TaggingContainerCssIds = {
   loadingContainer: "onesignal-loading-container",
+  taggingContainer: "tagging-container",
 };
 
 export const DEFAULT_ICON = `data:image/svg+xml,%3Csvg fill='none' xmlns='http://www.w3.org/2000/svg'`+
