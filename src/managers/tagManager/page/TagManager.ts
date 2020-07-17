@@ -21,7 +21,7 @@ export default class TagManager implements ITagManager {
      * @param  {boolean} isInUpdateMode
      * @returns Promise resolving TagsObject if successful, {} if no change detected, null if failed
      */
-    public async sendTags(_isInUpdateMode: boolean): Promise<TagsObjectForApi> {
+    public async sendTags(): Promise<TagsObjectForApi> {
         Log.info("Category Slidedown Local Tags:", this.tagsFromTaggingContainer);
 
         const localTagsConvertedToApi = TagUtils.convertTagsBooleansToApi(this.tagsFromTaggingContainer);
