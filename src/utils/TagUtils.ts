@@ -63,7 +63,9 @@ export default class TagUtils {
 
             const isExistingPlayerTagsEmpty = TagUtils.isTagObjectEmpty(existingPlayerTags);
             if (isExistingPlayerTagsEmpty) {
-                return categories;
+                const categoriesCopy = deepCopy(categories);
+                TagUtils.markAllTagsAsSpecified(categoriesCopy, true);
+                return categoriesCopy;
             }
 
             const categoriesCopy = deepCopy<TagCategory[]>(categories);
