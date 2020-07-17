@@ -125,7 +125,6 @@ $border-radius: 0.5em;
     padding-left: 2.5em;
     margin-bottom: 1.5em;
     color: #051B2C;
-    cursor: pointer;
     font-size: 1em;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -160,6 +159,7 @@ $border-radius: 0.5em;
     }
 
     .onesignal-category-label-text {
+      cursor: pointer;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
