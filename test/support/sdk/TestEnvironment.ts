@@ -220,6 +220,7 @@ export class TestEnvironment {
     }
 
     let html = '<!doctype html><html><head></head><body></body></html>';
+    global.document = jsdom.jsdom('');
     if (config.addPrompts) {
       html = `<!doctype html><html><head>\
       <div class="${CustomLink.containerClass}"></div>\

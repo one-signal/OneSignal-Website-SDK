@@ -136,7 +136,7 @@ export default class TaggingContainer {
         const tags: TagsObjectWithBoolean = {};
 
         inputNodeArr.forEach(node => {
-            tags[(<HTMLInputElement>node).defaultValue] = (<HTMLInputElement>node).checked;
+            tags[(<HTMLInputElement>node).value] = (<HTMLInputElement>node).checked;
         });
         return tags;
     }
