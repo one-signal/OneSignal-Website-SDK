@@ -222,6 +222,11 @@ export class SessionManager implements ISessionManager {
       return;
     }
 
+    if (!this.context.environmentInfo.canTalkToServiceWorker) {
+      Log.debug("Not setting session event listeners. No SW possible 2.");
+      return;
+    }
+
     // Page lifecycle events https://developers.google.com/web/updates/2018/07/page-lifecycle-api
 
     this.setupOnFocusAndOnBlurForSession();
