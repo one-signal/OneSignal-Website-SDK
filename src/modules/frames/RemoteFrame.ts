@@ -32,6 +32,7 @@ export default class RemoteFrame implements Disposable {
     subdomainName: string;
     /* Passed to both the iFrame and popup. Represents Site URL in dashboard config. */
     origin: string;
+    siteName: string;
     /* These three flags may be deprecated */
     continuePressed: boolean;
     isPopup: boolean;
@@ -41,6 +42,7 @@ export default class RemoteFrame implements Disposable {
       appId: initOptions.appId,
       subdomain: initOptions.subdomainName,
       origin: initOptions.origin,
+      siteName: initOptions.siteName,
       metrics: {
         enable: false,
         mixpanelReportingToken: null
