@@ -281,7 +281,8 @@ export default class OneSignal {
 
       OneSignal.__initAlreadyCalled = true;
 
-      OneSignal.emitter.on(OneSignal.EVENTS.NATIVE_PROMPT_PERMISSIONCHANGED, EventHelper.onNotificationPermissionChange);
+      OneSignal.emitter.on(OneSignal.EVENTS.NATIVE_PROMPT_PERMISSIONCHANGED,
+        EventHelper.onNotificationPermissionChange);
       OneSignal.emitter.on(OneSignal.EVENTS.SUBSCRIPTION_CHANGED, EventHelper._onSubscriptionChanged);
       OneSignal.emitter.on(OneSignal.EVENTS.SDK_INITIALIZED, InitHelper.onSdkInitialized);
 
@@ -701,7 +702,7 @@ export default class OneSignal {
    * @param callback A function accepting one parameter for the OneSignal email ID.
    * @PublicApi
    */
-  static async getEmailId(callback?: Action<string | undefined>): Promise<string | undefined> {
+  static async getEmailId(callback?: Action<string | undefined>): Promise<string | null | undefined> {
     await awaitOneSignalInitAndSupported();
     logMethodCall('getEmailId', callback);
     const emailProfile = await Database.getEmailProfile();
