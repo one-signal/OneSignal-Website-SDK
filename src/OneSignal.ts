@@ -543,6 +543,12 @@ export default class OneSignal {
     await awaitOneSignalInitAndSupported();
     logMethodCall("setExternalUserId");
 
+    if (!!authHash) {
+      if ( authHash.length !== 64 ) {
+        throw new InvalidArgumentError('options.identifierAuthHash', InvalidArgumentReason.Malformed);
+      }
+    }
+
     const isExistingUser = await this.context.subscriptionManager.isAlreadyRegisteredWithOneSignal();
     if (!isExistingUser) {
       await awaitSdkEvent(OneSignal.EVENTS.REGISTERED);
