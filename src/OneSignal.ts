@@ -491,12 +491,12 @@ export default class OneSignal {
       });
     }
 
-    var { deviceId } = await Database.getSubscription();
+    const { deviceId } = await Database.getSubscription();
     if (!deviceId) {
       await awaitSdkEvent(OneSignal.EVENTS.REGISTERED);
     }
     // After the user subscribers, he will have a device ID, so get it again
-    var { deviceId: newDeviceId } = await Database.getSubscription();
+    const { deviceId: newDeviceId } = await Database.getSubscription();
     await OneSignalApi.updatePlayer(appId, newDeviceId!, {
       tags: tags
     });
@@ -524,7 +524,7 @@ export default class OneSignal {
       Log.info(new InvalidArgumentError('tags', InvalidArgumentReason.Empty));
     }
     const tagsToSend = {} as {[key: string]: string};
-    for (let tag of tags) {
+    for (const tag of tags) {
       tagsToSend[tag] = '';
     }
     const deletedTags = await OneSignal.sendTags(tagsToSend);
@@ -764,7 +764,7 @@ export default class OneSignal {
    */
   static async sendSelfNotification(title: string = 'OneSignal Test Message',
                               message: string = 'This is an example notification.',
-                              url: string = new URL(location.href).origin + '?_osp=do_not_open',
+                              url: string = `${new URL(location.href).origin}?_osp=do_not_open`,
                               icon: URL,
                               data: Map<String, any>,
                               buttons: Array<NotificationActionButton>): Promise<void> {
