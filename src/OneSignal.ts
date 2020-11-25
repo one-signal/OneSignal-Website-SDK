@@ -782,7 +782,7 @@ export default class OneSignal {
       throw new InvalidArgumentError('icon', InvalidArgumentReason.Malformed);
 
     if (subscription.deviceId) {
-      await OneSignalApi.sendNotification(appConfig.appId, [subscription.deviceId], {'en': title}, {'en': message},
+      await OneSignalApi.sendNotification(appConfig.appId, [subscription.deviceId], { en : title }, { en : message },
                                                url, icon, data, buttons);
     }
   }
@@ -1097,6 +1097,7 @@ export default class OneSignal {
 
 LegacyManager.ensureBackwardsCompatibility(OneSignal);
 
-Log.info(`%cOneSignal Web SDK loaded (version ${OneSignal._VERSION}, ${SdkEnvironment.getWindowEnv().toString()} environment).`, getConsoleStyle('bold'));
+Log.info(`%cOneSignal Web SDK loaded (version ${OneSignal._VERSION},
+  ${SdkEnvironment.getWindowEnv().toString()} environment).`, getConsoleStyle('bold'));
 Log.debug(`Current Page URL: ${typeof location === "undefined" ? "NodeJS" : location.href}`);
 Log.debug(`Browser Environment: ${bowser.name} ${bowser.version}`);
