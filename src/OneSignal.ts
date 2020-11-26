@@ -495,7 +495,7 @@ export default class OneSignal {
     if (!deviceId) {
       await awaitSdkEvent(OneSignal.EVENTS.REGISTERED);
     }
-    // After the user subscribers, he will have a device ID, so get it again
+    // After the user subscribes, he will have a device ID, so get it again
     const { deviceId: newDeviceId } = await Database.getSubscription();
     await OneSignalApi.updatePlayer(appId, newDeviceId!, {
       tags: tags
