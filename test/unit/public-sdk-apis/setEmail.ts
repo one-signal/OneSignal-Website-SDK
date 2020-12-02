@@ -159,7 +159,7 @@ async function expectPushRecordUpdateRequest(
           app_id: OneSignal.context.appConfig.appId,
           parent_player_id: newEmailId ? newEmailId : undefined,
           email: emailAddress,
-          external_user_id_auth: externalUserIdAuth
+          external_user_id_auth_hash: externalUserIdAuth
         })
       );
       return { success : true, id : newUpdatedPlayerId };
