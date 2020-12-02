@@ -5,4 +5,6 @@ export interface UpdatePlayerOptions {
     external_user_id_auth_hash  ?: string | null;
     identifier_auth_hash        ?: string | null;
     notification_types          ?: SubscriptionStateKind;
+    email                       ?: string | null;
+    parent_player_id            ?: string | null;
 }
