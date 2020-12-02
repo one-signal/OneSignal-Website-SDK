@@ -104,7 +104,7 @@ export default class OneSignal {
     const isEmailAuthHashDefined      = options && !!options.emailAuthHash;
 
     const authHash = isIdentifierAuthHashDefined ? options.identifierAuthHash :
-    (isEmailAuthHashDefined ? options.emailAuthHash : undefined);
+      (isEmailAuthHashDefined ? options.emailAuthHash : undefined);
 
     if (!!authHash) {
       if (isIdentifierAuthHashDefined && isEmailAuthHashDefined) {
