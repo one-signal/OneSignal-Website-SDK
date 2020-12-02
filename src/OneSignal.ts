@@ -499,11 +499,11 @@ export default class OneSignal {
     // After the user subscribes, he will have a device ID, so get it again
     const { deviceId: newDeviceId } = await Database.getSubscription();
     const authHash = await Database.getExternalUserIdAuthHash();
-    const payload : SendTagsOptions = { tags };
+    const options : SendTagsOptions = { tags };
     if (!!authHash) {
-      payload.external_user_id_auth_hash = authHash;
+      options.external_user_id_auth_hash = authHash;
     }
-    await OneSignalApi.updatePlayer(appId, newDeviceId!, payload);
+    await OneSignalApi.updatePlayer(appId, newDeviceId!, options);
     executeCallback(callback, tags);
     return tags;
   }
