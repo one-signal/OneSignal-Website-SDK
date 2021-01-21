@@ -1,19 +1,26 @@
 import {
-  AppUserConfig, AppConfig, ServerAppConfigPrompt,
-  ConfigIntegrationKind, ServerAppConfig } from "../models/AppConfig";
+  AppUserConfig, AppConfig, ServerAppPromptConfig,
+  ConfigIntegrationKind, ServerAppConfig, SlidedownOptionsVersion1 } from "../models/AppConfig";
 import { WindowEnvironmentKind } from "../models/WindowEnvironmentKind";
 import { SdkInitError, SdkInitErrorKind } from "../errors/SdkInitError";
 import SdkEnvironment from "../managers/SdkEnvironment";
 import OneSignalUtils from "../utils/OneSignalUtils";
 import Utils from "../context/shared/utils/Utils";
-import MainHelper from './MainHelper';
 import {
   SERVER_CONFIG_DEFAULTS_SESSION,
-  SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS
+  SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS,
+  SERVER_CONFIG_DEFAULTS_SLIDEDOWN
 } from "../config";
-import { AppUserConfigCustomLinkOptions, AppUserConfigPromptOptions } from '../models/Prompts';
+import {
+  AppUserConfigCustomLinkOptions,
+  AppUserConfigPromptOptions,
+  DelayedPromptType,
+  SlidedownPromptOptions,
+  SlidedownDelayOptions,
+  SlidedownOptions
+} from '../models/Prompts';
 import TagUtils from '../../src/utils/TagUtils';
-import { Categories } from '../../src/models/Tags';
+import PromptsHelper from './PromptsHelper';
 
 export enum IntegrationConfigurationKind {
   /**
@@ -33,6 +40,59 @@ export interface IntegrationCapabilities {
 const MAX_CATEGORIES = 10;
 
 export class ConfigHelper {
+  private static convertConfigToVersionTwo(slidedownConfig: SlidedownOptionsVersion1) : SlidedownOptions {
+    // determine if the slidedown is category type or regular push
+    const promptType = (!!slidedownConfig?.categories?.tags && slidedownConfig.categories.tags.length > 0) ?
+      DelayedPromptType.Category : DelayedPromptType.Push;
+    if (!!slidedownConfig.categories) {
+      var { positiveUpdateButton, negativeUpdateButton } = slidedownConfig.categories;
+    }
+    return {
+      prompts: [{
+        type: promptType,
+        autoPrompt: slidedownConfig.autoPrompt,
+        text: {
+          actionMessage: slidedownConfig.actionMessage,
+          acceptButton: slidedownConfig.acceptButton,
+          cancelButton: slidedownConfig.cancelButton,
+          // categories-specific...
+          positiveUpdateButton,
+          negativeUpdateButton,
+          updateMessage:  slidedownConfig?.categories?.updateMessage
+        },
+        delay: {
+          pageViews: slidedownConfig.pageViews,
+          timeDelay: slidedownConfig.timeDelay
+        },
+        categories: slidedownConfig?.categories?.tags
+      }]
+    } as SlidedownOptions;
+  }
+
+  private static isSlidedownConfigVersion1(
+    slidedownConfig: any) : slidedownConfig is SlidedownOptionsVersion1 {
+      const version1Keys = [
+        'enabled',
+        'autoPrompt',
+        'pageViews',
+        'timeDelay',
+        'acceptButton',
+        'cancelButton',
+        'actionMessage',
+        'customizeTextEnabled',
+        'categories'
+      ];
+
+      const slidedownConfigKeys = Object.keys(slidedownConfig);
+      for (let i=0; i<version1Keys.length; i++) {
+        for (let j=0; j<slidedownConfigKeys.length; j++) {
+          if (version1Keys[i] === slidedownConfigKeys[j]) return true;
+        }
+      }
+
+      return false;
+    }
+
   public static async getAppConfig(userConfig: AppUserConfig,
     downloadServerAppConfig: (appId: string) => Promise<ServerAppConfig>): Promise<AppConfig> {
     try {
@@ -40,6 +100,15 @@ export class ConfigHelper {
         throw new SdkInitError(SdkInitErrorKind.InvalidAppId);
 
       const serverConfig = await downloadServerAppConfig(userConfig.appId);
+
+      const isCustomCode = this.getConfigIntegrationKind(serverConfig) === ConfigIntegrationKind.Custom;
+      if (isCustomCode && !!userConfig.promptOptions?.slidedown) {
+        if (this.isSlidedownConfigVersion1(userConfig.promptOptions.slidedown)) {
+          userConfig.promptOptions.slidedown =
+            this.convertConfigToVersionTwo(userConfig.promptOptions?.slidedown as SlidedownOptionsVersion1);
+        }
+      }
+
       const appConfig = this.getMergedConfig(userConfig, serverConfig);
       this.checkRestrictedOrigin(appConfig);
       return appConfig;
@@ -188,14 +257,14 @@ export class ConfigHelper {
   /**
    * Used for Custom Code Integration Type
    * @param  {AppUserConfigPromptOptions|undefined} promptOptions
-   * @param  {ServerAppConfigPrompt} defaultsFromServer
+   * @param  {ServerAppPromptConfig} defaultsFromServer
    * @param  {AppUserConfig} wholeUserConfig
    * @param  {boolean=false} isUsingSubscriptionWorkaround
    * @returns AppUserConfigPromptOptions
    */
   public static injectDefaultsIntoPromptOptions(
     promptOptions: AppUserConfigPromptOptions | undefined,
-    defaultsFromServer: ServerAppConfigPrompt,
+    defaultsFromServer: ServerAppPromptConfig,
     wholeUserConfig: AppUserConfig,
     isUsingSubscriptionWorkaround: boolean = false,
   ): AppUserConfigPromptOptions | undefined {
@@ -230,26 +299,71 @@ export class ConfigHelper {
       }
     };
 
-    if (promptOptionsConfig.slidedown) {
-      promptOptionsConfig.slidedown.enabled = !!promptOptionsConfig.slidedown.enabled;
-      promptOptionsConfig.slidedown.autoPrompt = promptOptionsConfig.slidedown.hasOwnProperty("autoPrompt") ?
-        !!promptOptionsConfig.slidedown.enabled && !!promptOptionsConfig.slidedown.autoPrompt :
-        !!promptOptionsConfig.slidedown.enabled;
-        promptOptionsConfig.slidedown.pageViews = Utils.getValueOrDefault(promptOptionsConfig.slidedown.pageViews,
-          SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews);
-        promptOptionsConfig.slidedown.timeDelay = Utils.getValueOrDefault(promptOptionsConfig.slidedown.timeDelay,
-          SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay);
+    let defaultSlidedownOptions;
 
-      if (promptOptionsConfig.slidedown.categories) {
-        const { categories } = promptOptionsConfig.slidedown;
-        promptOptionsConfig.slidedown.categories = TagUtils.limitCategoriesToMaxCount(categories, MAX_CATEGORIES);
-      }
+    if (promptOptionsConfig.slidedown) {
+      promptOptionsConfig.slidedown.prompts = promptOptionsConfig.slidedown?.prompts?.map(promptOption => {
+        promptOption.type = Utils.getValueOrDefault(promptOption.type, DelayedPromptType.Push);
+
+        if (promptOption.type === DelayedPromptType.Category) {
+          promptOption.text = {
+            ...promptOption.text,
+            positiveUpdateButton: Utils.getValueOrDefault(promptOption.text.positiveUpdateButton,
+              SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.positiveUpdateButton),
+            negativeUpdateButton: Utils.getValueOrDefault(promptOption.text.negativeUpdateButton,
+              SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.negativeUpdateButton),
+            updateMessage: Utils.getValueOrDefault(promptOption.text.updateMessage,
+              SERVER_CONFIG_DEFAULTS_SLIDEDOWN.categoryDefaults.updateMessage),
+          };
+        }
+
+        promptOption.text = {
+          ...promptOption.text,
+          actionMessage: Utils.getValueOrDefault(promptOption?.text?.actionMessage,
+            SERVER_CONFIG_DEFAULTS_SLIDEDOWN.actionMessage),
+          acceptButton: Utils.getValueOrDefault(promptOption?.text?.acceptButton,
+            SERVER_CONFIG_DEFAULTS_SLIDEDOWN.acceptButton),
+          cancelButton: Utils.getValueOrDefault(promptOption?.text?.cancelButton,
+            SERVER_CONFIG_DEFAULTS_SLIDEDOWN.cancelButton)
+        };
+
+        promptOption.autoPrompt = Utils.getValueOrDefault(promptOption.autoPrompt, false);
+
+        promptOption.delay = {
+          pageViews: Utils.getValueOrDefault(promptOption.delay?.pageViews,
+            SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews),
+          timeDelay: Utils.getValueOrDefault(promptOption.delay?.timeDelay,
+            SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay)
+        };
+
+        if (promptOption.categories) {
+          const { categories } = promptOption;
+          promptOption.categories = TagUtils.limitCategoriesToMaxCount(categories, MAX_CATEGORIES);
+        }
+
+        return promptOption;
+      });
+
     } else {
-      promptOptionsConfig.slidedown = MainHelper.getSlidedownPermissionMessageOptions(promptOptionsConfig);
-      promptOptionsConfig.slidedown.enabled = false;
-      promptOptionsConfig.slidedown.autoPrompt = false;
-      promptOptionsConfig.slidedown.pageViews = SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews;
-      promptOptionsConfig.slidedown.timeDelay = SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay;
+      promptOptionsConfig.slidedown = { prompts: [] };
+
+      const delayOptions : SlidedownDelayOptions = {
+        timeDelay: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay,
+        pageViews: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews
+      };
+
+      defaultSlidedownOptions = {
+        type        : DelayedPromptType.Push,
+        text        : {
+          actionMessage     : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.actionMessage,
+          acceptButton  : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.acceptButton,
+          cancelButton  : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.cancelButton
+        },
+        autoPrompt  : false, // default to false
+        delay       : delayOptions
+      } as SlidedownPromptOptions;
+
+      promptOptionsConfig.slidedown.prompts = [defaultSlidedownOptions];
     }
 
     if (promptOptionsConfig.native) {
@@ -281,8 +395,12 @@ export class ConfigHelper {
         promptOptionsConfig.native.autoPrompt = false;
 
         // enable slidedown & make it autoPrompt
-        promptOptionsConfig.slidedown.enabled = true;
-        promptOptionsConfig.slidedown.autoPrompt = true;
+        const text = {
+          actionMessage : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.actionMessage,
+          acceptButton  : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.acceptButton,
+          cancelButton  : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.cancelButton,
+        };
+        promptOptionsConfig.slidedown.prompts = [{ type: DelayedPromptType.Push, autoPrompt: true, text }];
       } else {
         //enable native prompt & make it autoPrompt
         promptOptionsConfig.native.enabled = true;
@@ -292,11 +410,13 @@ export class ConfigHelper {
       }
     }
 
+    // sets top level `autoPrompt` to trigger autoprompt codepath in initialization / prompting flow
     promptOptionsConfig.autoPrompt = promptOptionsConfig.native.autoPrompt ||
-      promptOptionsConfig.slidedown.autoPrompt;
+      PromptsHelper.isSlidedownAutoPromptConfigured(promptOptionsConfig.slidedown.prompts);
 
     return promptOptionsConfig;
   }
+
   /**
    * Used only with Dashboard Configuration
    * @param  {ServerAppConfig} serverConfig
@@ -317,29 +437,16 @@ export class ConfigHelper {
       pageViews: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews,
       timeDelay: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay
     };
-    let categories: Categories | undefined = undefined;
-    if (staticPrompts.slidedown.categories) {
-      categories = TagUtils.limitCategoriesToMaxCount(staticPrompts.slidedown.categories, MAX_CATEGORIES);
-    }
 
-    const slidedown = {
-      enabled: staticPrompts.slidedown.enabled,
-      // for backwards compatibility if not specifically false, then assume true for autoPrompt on slidedown
-      autoPrompt: staticPrompts.slidedown.enabled &&
-        staticPrompts.slidedown.autoPrompt !== false,
-      pageViews: Utils.getValueOrDefault(staticPrompts.slidedown.pageViews,
-          SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews),
-      timeDelay: Utils.getValueOrDefault(staticPrompts.slidedown.timeDelay,
-          SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay),
-      actionMessage: staticPrompts.slidedown.actionMessage,
-      acceptButtonText: staticPrompts.slidedown.acceptButton,
-      cancelButtonText: staticPrompts.slidedown.cancelButton,
-      categories,
-    };
+    // cast slidedown to `SlidedownOptions` type
+    const { prompts } = staticPrompts.slidedown as SlidedownOptions;
+
     return {
-      autoPrompt: native.autoPrompt || slidedown.autoPrompt,
+      autoPrompt: native.autoPrompt || PromptsHelper.isSlidedownAutoPromptConfigured(prompts),
       native,
-      slidedown,
+      slidedown: {
+        prompts
+      },
       fullscreen: {
         enabled: staticPrompts.fullscreen.enabled,
         actionMessage: staticPrompts.fullscreen.actionMessage,
