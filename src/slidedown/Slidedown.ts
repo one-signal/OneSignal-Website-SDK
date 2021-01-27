@@ -31,19 +31,19 @@ export default class Slidedown {
   // category slidedown
   public isShowingFailureState: boolean;
   private tagCategories          : TagCategory[] | undefined;
+  private savingButton           : string = SERVER_CONFIG_DEFAULTS_SLIDEDOWN.savingText;
+  private errorButton            : string = SERVER_CONFIG_DEFAULTS_SLIDEDOWN.errorButton;
   private updateMessage         ?: string;
   private positiveUpdateButton  ?: string;
   private negativeUpdateButton  ?: string;
-  private savingButton       : string = SERVER_CONFIG_DEFAULTS_SLIDEDOWN.savingText;
-  private errorButton        : string = SERVER_CONFIG_DEFAULTS_SLIDEDOWN.errorButton;
 
   constructor(options: SlidedownPromptOptions) {
-    this.options = options;
+    this.options                    = options;
     this.options.text.actionMessage = options.text.actionMessage.substring(0, 90);
-    this.options.text.acceptButton = options.text.acceptButton.substring(0, 16);
-    this.options.text.cancelButton = options.text.cancelButton.substring(0, 16);
-    this.notificationIcons = null;
-    this.isShowingFailureState = false;
+    this.options.text.acceptButton  = options.text.acceptButton.substring(0, 16);
+    this.options.text.cancelButton  = options.text.cancelButton.substring(0, 16);
+    this.notificationIcons          = null;
+    this.isShowingFailureState      = false;
 
     switch (options.type) {
       case DelayedPromptType.Category:
@@ -51,7 +51,7 @@ export default class Slidedown {
         this.positiveUpdateButton = this.options.text.positiveUpdateButton?.substring(0, 16);
         this.updateMessage        = this.options.text.updateMessage?.substring(0, 90);
         this.tagCategories        = options.categories;
-        this.errorButton      = Utils.getValueOrDefault(this.options.text.positiveUpdateButton,
+        this.errorButton          = Utils.getValueOrDefault(this.options.text.positiveUpdateButton,
           SERVER_CONFIG_DEFAULTS_SLIDEDOWN.errorButton);
         break;
       // TO DO: other cases: sms, email, smsAndEmail
