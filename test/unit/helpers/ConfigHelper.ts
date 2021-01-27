@@ -6,6 +6,7 @@ import { AppUserConfig } from '../../../src/models/AppConfig';
 import Random from "../../support/tester/Random";
 import { ConfigHelper } from '../../../src/helpers/ConfigHelper';
 import { DelayedPromptType } from '../../../src/models/Prompts';
+import { getPromptOptionsFromFinalAppConfig } from '../../../test/support/tester/ConfigHelperTestHelper';
 
 test.beforeEach(async () => {
   await TestEnvironment.initialize({
@@ -360,4 +361,62 @@ test('autoResubscribe - autoRegister backwards compatibility for custom integrat
     fakeServerConfig
   );
   t.is(finalConfig.autoResubscribe, true);
+});
+
+test("supports version 1 of config schema (converts to version 2) - slidedown type is 'push'", async t => {
+  const fakeUserConfig: AppUserConfig = {
+    appId: Random.getRandomUuid(),
+    autoRegister: false,
+    autoResubscribe: true
+  };
+
+  (fakeUserConfig as any).promptOptions = {
+    slidedown: {
+      autoPrompt: true,
+      enabled: true,
+    }
+  };
+  const promptOptions = await getPromptOptionsFromFinalAppConfig(fakeUserConfig);
+
+  t.is(promptOptions?.type, DelayedPromptType.Push);
+  t.is(promptOptions?.delay?.pageViews, 1);
+  t.is(promptOptions?.delay?.timeDelay, 0);
+  t.is(promptOptions?.autoPrompt, true);
+  t.is(promptOptions?.text.acceptButton, "Allow");
+  t.is(promptOptions?.text.cancelButton, "Cancel");
+  t.is(promptOptions?.text.actionMessage, "We'd like to show you notifications for the latest news and updates.");
+});
+
+test("supports version 1 of config schema (converts to version 2) - slidedown type is 'category'", async t => {
+  const fakeUserConfig: AppUserConfig = {};
+
+  (fakeUserConfig as any).promptOptions = {
+    slidedown: {
+        autoPrompt: false,
+        enabled: true,
+        categories: {
+            positiveUpdateButton: "Howdy, yes",
+            negativeUpdateButton: "Cancelar",
+            tags: [
+              {
+                  tag: "politics",
+                  label: "Politics",
+              },
+              {
+                  tag: "usa_news",
+                  label: "USA News",
+              },
+            ]
+        }
+    }
+  };
+  const promptOptions = await getPromptOptionsFromFinalAppConfig(fakeUserConfig);
+
+  t.is(promptOptions?.type, DelayedPromptType.Category);
+  t.is(promptOptions?.delay?.pageViews, 1);
+  t.is(promptOptions?.delay?.timeDelay, 0);
+  t.is(promptOptions?.autoPrompt, false);
+  t.is(promptOptions?.text.positiveUpdateButton, "Howdy, yes");
+  t.is(promptOptions?.text.negativeUpdateButton, "Cancelar");
+  t.is(promptOptions?.text.actionMessage, "We'd like to show you notifications for the latest news and updates.");
 });
