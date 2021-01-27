@@ -438,8 +438,7 @@ export class ConfigHelper {
       timeDelay: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.timeDelay
     };
 
-    // cast slidedown to `SlidedownOptions` type
-    const { prompts } = staticPrompts.slidedown as SlidedownOptions;
+    const { prompts } = staticPrompts.slidedown;
 
     return {
       autoPrompt: native.autoPrompt || PromptsHelper.isSlidedownAutoPromptConfigured(prompts),
