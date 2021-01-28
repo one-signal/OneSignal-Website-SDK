@@ -325,7 +325,8 @@ test("supports version 1 of config schema (converts to version 2) - slidedown ty
       enabled: true,
     }
   };
-  const promptOptions = await getPromptOptionsFromFinalAppConfig(fakeUserConfig);
+  const appConfig = await getFinalAppConfig(fakeUserConfig);
+  const promptOptions = appConfig.userConfig.promptOptions?.slidedown?.prompts[0];
 
   t.is(promptOptions?.type, DelayedPromptType.Push);
   t.is(promptOptions?.delay?.pageViews, 1);
@@ -359,7 +360,8 @@ test("supports version 1 of config schema (converts to version 2) - slidedown ty
         }
     }
   };
-  const promptOptions = await getPromptOptionsFromFinalAppConfig(fakeUserConfig);
+  const appConfig = await getFinalAppConfig(fakeUserConfig);
+  const promptOptions = appConfig.userConfig.promptOptions?.slidedown?.prompts[0];
 
   t.is(promptOptions?.type, DelayedPromptType.Category);
   t.is(promptOptions?.delay?.pageViews, 1);
