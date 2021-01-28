@@ -42,11 +42,9 @@ export default class TagUtils {
     }
 
     static markAllTagsAsSpecified(categoryArray: TagCategory[], checked: boolean): void {
-        if (categoryArray) {
-            categoryArray.forEach(category => {
-                category.checked = checked;
-            });
-        }
+        categoryArray.forEach(category => {
+            category.checked = checked;
+        });
     }
 
     static isTagObjectEmpty(tags: TagsObjectForApi | TagsObjectWithBoolean): boolean {
