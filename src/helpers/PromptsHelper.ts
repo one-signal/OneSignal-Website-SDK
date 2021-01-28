@@ -1,3 +1,4 @@
+import { SlidedownOptionsVersion1 } from '../../src/models/AppConfig';
 import {
   DelayedPromptType,
   SlidedownPromptOptions,
@@ -12,6 +13,14 @@ export default class PromptsHelper {
       return (!!options.categories && options.categories.length > 0);
     }
     return false;
+  }
+  /**
+   * Is Category Slidedown Configured (version 1 config schema)
+   * @param  {SlidedownOptionsVersion1} options
+   * @returns boolean
+   */
+  static isCategorySlidedownConfiguredVersion1(options: SlidedownOptionsVersion1): boolean {
+    return !!options?.categories?.tags && options.categories.tags.length > 0;
   }
 
   static getSlidedownPromptOptionsWithType(prompts: SlidedownPromptOptions[] | undefined, type: DelayedPromptType):
