@@ -42,11 +42,15 @@ const MAX_CATEGORIES = 10;
 export class ConfigHelper {
   private static convertConfigToVersionTwo(slidedownConfig: SlidedownOptionsVersion1) : SlidedownOptions {
     // determine if the slidedown is category type or regular push
-    const promptType = (!!slidedownConfig?.categories?.tags && slidedownConfig.categories.tags.length > 0) ?
+    const promptType = PromptsHelper.isCategorySlidedownConfiguredVersion1(slidedownConfig) ?
       DelayedPromptType.Category : DelayedPromptType.Push;
-    if (!!slidedownConfig.categories) {
-      var { positiveUpdateButton, negativeUpdateButton } = slidedownConfig.categories;
+
+    let positiveUpdateButton, negativeUpdateButton: string|undefined;
+    if (promptType === DelayedPromptType.Category) {
+      positiveUpdateButton = slidedownConfig.categories?.positiveUpdateButton;
+      negativeUpdateButton = slidedownConfig.categories?.negativeUpdateButton;
     }
+
     return {
       prompts: [{
         type: promptType,
@@ -69,6 +73,31 @@ export class ConfigHelper {
     } as SlidedownOptions;
   }
 
+  /**
+   * For use with Custom Code Implementations
+   * Checks whether `slidedownConfig` implements `SlidedownOptionsVersion1` interface
+   * ------------------------------
+   * v1 schema:
+   * ----------
+   * "slidedown": {
+   *    "enabled": true,
+   *    "autoPrompt": true,
+   *    "...",
+   *    "categories": {...}
+   * }
+   *
+   * v2 schema:
+   * ----------
+   * "slidedown": {
+   *    "prompts": [{...}, {...}, {...}]
+   * }
+   *
+   * Since config can also be set via custom-code and we have no strict checks,
+   * this function helps to check whether the config implements any v1 style config options
+   * by looking for any of the v1 payload first-level keys. See `SlidedownOptionsVersion1`
+   * for the full list of keys.
+   * @param slidedownConfig
+   */
   private static isSlidedownConfigVersion1(
     slidedownConfig: any) : slidedownConfig is SlidedownOptionsVersion1 {
       const version1Keys = [
@@ -84,8 +113,8 @@ export class ConfigHelper {
       ];
 
       const slidedownConfigKeys = Object.keys(slidedownConfig);
-      for (let i=0; i<version1Keys.length; i++) {
-        for (let j=0; j<slidedownConfigKeys.length; j++) {
+      for (let i = 0; i < version1Keys.length; i++) {
+        for (let j = 0; j < slidedownConfigKeys.length; j++) {
           if (version1Keys[i] === slidedownConfigKeys[j]) return true;
         }
       }
@@ -100,8 +129,8 @@ export class ConfigHelper {
         throw new SdkInitError(SdkInitErrorKind.InvalidAppId);
 
       const serverConfig = await downloadServerAppConfig(userConfig.appId);
-
       const isCustomCode = this.getConfigIntegrationKind(serverConfig) === ConfigIntegrationKind.Custom;
+
       if (isCustomCode && !!userConfig.promptOptions?.slidedown) {
         if (this.isSlidedownConfigVersion1(userConfig.promptOptions.slidedown)) {
           userConfig.promptOptions.slidedown =
@@ -299,8 +328,6 @@ export class ConfigHelper {
       }
     };
 
-    let defaultSlidedownOptions;
-
     if (promptOptionsConfig.slidedown) {
       promptOptionsConfig.slidedown.prompts = promptOptionsConfig.slidedown?.prompts?.map(promptOption => {
         promptOption.type = Utils.getValueOrDefault(promptOption.type, DelayedPromptType.Push);
@@ -327,7 +354,7 @@ export class ConfigHelper {
             SERVER_CONFIG_DEFAULTS_SLIDEDOWN.cancelButton)
         };
 
-        promptOption.autoPrompt = Utils.getValueOrDefault(promptOption.autoPrompt, false);
+        promptOption.autoPrompt = Utils.getValueOrDefault(promptOption.autoPrompt, true);
 
         promptOption.delay = {
           pageViews: Utils.getValueOrDefault(promptOption.delay?.pageViews,
@@ -352,16 +379,16 @@ export class ConfigHelper {
         pageViews: SERVER_CONFIG_DEFAULTS_PROMPT_DELAYS.pageViews
       };
 
-      defaultSlidedownOptions = {
+      const defaultSlidedownOptions : SlidedownPromptOptions = {
         type        : DelayedPromptType.Push,
         text        : {
-          actionMessage     : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.actionMessage,
+          actionMessage : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.actionMessage,
           acceptButton  : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.acceptButton,
           cancelButton  : SERVER_CONFIG_DEFAULTS_SLIDEDOWN.cancelButton
         },
         autoPrompt  : false, // default to false
         delay       : delayOptions
-      } as SlidedownPromptOptions;
+      };
 
       promptOptionsConfig.slidedown.prompts = [defaultSlidedownOptions];
     }
