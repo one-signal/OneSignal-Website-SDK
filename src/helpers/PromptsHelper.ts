@@ -20,7 +20,7 @@ export default class PromptsHelper {
    * @returns boolean
    */
   static isCategorySlidedownConfiguredVersion1(options: SlidedownOptionsVersion1): boolean {
-    return !!options?.categories?.tags && options.categories.tags.length > 0;
+    return (!!options?.categories?.tags.length || 0) > 0;
   }
 
   static getSlidedownPromptOptionsWithType(prompts: SlidedownPromptOptions[] | undefined, type: DelayedPromptType):
