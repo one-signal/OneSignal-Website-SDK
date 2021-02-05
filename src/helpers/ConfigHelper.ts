@@ -21,6 +21,7 @@ import {
 } from '../models/Prompts';
 import TagUtils from '../../src/utils/TagUtils';
 import PromptsHelper from './PromptsHelper';
+import { ConverterHelper } from "./ConverterHelper";
 
 export enum IntegrationConfigurationKind {
   /**
@@ -40,84 +41,6 @@ export interface IntegrationCapabilities {
 const MAX_CATEGORIES = 10;
 
 export class ConfigHelper {
-  private static convertConfigToVersionTwo(slidedownConfig: SlidedownOptionsVersion1) : SlidedownOptions {
-    // determine if the slidedown is category type or regular push
-    const promptType = PromptsHelper.isCategorySlidedownConfiguredVersion1(slidedownConfig) ?
-      DelayedPromptType.Category : DelayedPromptType.Push;
-
-    let positiveUpdateButton, negativeUpdateButton: string|undefined;
-    if (promptType === DelayedPromptType.Category) {
-      positiveUpdateButton = slidedownConfig.categories?.positiveUpdateButton;
-      negativeUpdateButton = slidedownConfig.categories?.negativeUpdateButton;
-    }
-
-    return {
-      prompts: [{
-        type: promptType,
-        autoPrompt: slidedownConfig.autoPrompt,
-        text: {
-          actionMessage: slidedownConfig.actionMessage,
-          acceptButton: slidedownConfig.acceptButton,
-          cancelButton: slidedownConfig.cancelButton,
-          // categories-specific...
-          positiveUpdateButton,
-          negativeUpdateButton,
-          updateMessage:  slidedownConfig?.categories?.updateMessage
-        },
-        delay: {
-          pageViews: slidedownConfig.pageViews,
-          timeDelay: slidedownConfig.timeDelay
-        },
-        categories: slidedownConfig?.categories?.tags
-      }]
-    } as SlidedownOptions;
-  }
-
-  /**
-   * For use with Custom Code Implementations
-   * Checks whether `slidedownConfig` implements `SlidedownOptionsVersion1` interface
-   * ------------------------------
-   * v1 schema:
-   * ----------
-   * "slidedown": {
-   *    "enabled": true,
-   *    "autoPrompt": true,
-   *    "...",
-   *    "categories": {...}
-   * }
-   *
-   * v2 schema:
-   * ----------
-   * "slidedown": {
-   *    "prompts": [{...}, {...}, {...}]
-   * }
-   *
-   * Since config can also be set via custom-code and we have no strict checks,
-   * this function helps to check whether the config implements any v1 style config options
-   * by looking for any of the v1 payload first-level keys. See `SlidedownOptionsVersion1`
-   * for the full list of keys.
-   * @param slidedownConfig
-   */
-  private static isSlidedownConfigVersion1(
-    slidedownConfig: any) : slidedownConfig is SlidedownOptionsVersion1 {
-      const version1Keys = [
-        'enabled',
-        'autoPrompt',
-        'pageViews',
-        'timeDelay',
-        'acceptButton',
-        'cancelButton',
-        'actionMessage',
-        'customizeTextEnabled',
-        'categories'
-      ];
-
-      for (let i = 0; i < version1Keys.length; i++) {
-        if (slidedownConfig.hasOwnProperty(version1Keys[i])) return true;
-      }
-
-      return false;
-    }
 
   public static async getAppConfig(userConfig: AppUserConfig,
     downloadServerAppConfig: (appId: string) => Promise<ServerAppConfig>): Promise<AppConfig> {
@@ -126,12 +49,15 @@ export class ConfigHelper {
         throw new SdkInitError(SdkInitErrorKind.InvalidAppId);
 
       const serverConfig = await downloadServerAppConfig(userConfig.appId);
-      const isCustomCode = this.getConfigIntegrationKind(serverConfig) === ConfigIntegrationKind.Custom;
 
-      if (isCustomCode && !!userConfig.promptOptions?.slidedown) {
-        if (this.isSlidedownConfigVersion1(userConfig.promptOptions.slidedown)) {
+      if (ConverterHelper.isPromptOptionsVersion0(userConfig.promptOptions)) {
+        userConfig.promptOptions = ConverterHelper.convertConfigToVersionOne(userConfig.promptOptions);
+      }
+
+      if (ConverterHelper.isSlidedownConfigVersion1(userConfig.promptOptions?.slidedown)) {
+        if (userConfig.promptOptions?.slidedown){
           userConfig.promptOptions.slidedown =
-            this.convertConfigToVersionTwo(userConfig.promptOptions?.slidedown as SlidedownOptionsVersion1);
+            ConverterHelper.convertConfigToVersionTwo(userConfig.promptOptions?.slidedown);
         }
       }
 
