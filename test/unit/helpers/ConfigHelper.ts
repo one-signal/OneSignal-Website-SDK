@@ -312,6 +312,63 @@ test('autoResubscribe - autoRegister backwards compatibility for custom integrat
   t.is(finalConfig.autoResubscribe, true);
 });
 
+test("supports version 0 of config schema (converts to version 2) - slidedown type is 'push'", async t => {
+  const fakeUserConfig: AppUserConfig = {
+    appId: Random.getRandomUuid(),
+    autoRegister: false,
+    autoResubscribe: true
+  };
+
+  (fakeUserConfig as any).promptOptions = {
+    actionMessage: "Custom message",
+    acceptButtonText: "Custom accept button",
+    cancelButtonText: "Custom cancel button",
+    slidedown: {
+      autoPrompt: true,
+      enabled: true,
+    }
+  };
+  const appConfig = await getFinalAppConfig(fakeUserConfig);
+  const promptOptions = appConfig.userConfig.promptOptions?.slidedown?.prompts[0];
+
+  t.is(promptOptions?.type, DelayedPromptType.Push);
+  t.is(promptOptions?.delay?.pageViews, 1);
+  t.is(promptOptions?.delay?.timeDelay, 0);
+  t.is(promptOptions?.autoPrompt, true);
+  t.is(promptOptions?.text.acceptButton, "Custom accept button");
+  t.is(promptOptions?.text.cancelButton, "Custom cancel button");
+  t.is(promptOptions?.text.actionMessage, "Custom message");
+});
+
+test(`supports version 0 of config schema (converts to version 2) - using alternative text keys ` +
+  `without "Text" postfix - slidedown type is 'push'`, async t => {
+  const fakeUserConfig: AppUserConfig = {
+    appId: Random.getRandomUuid(),
+    autoRegister: false,
+    autoResubscribe: true
+  };
+
+  (fakeUserConfig as any).promptOptions = {
+    actionMessage: "Custom message",
+    acceptButton: "Custom accept button",
+    cancelButton: "Custom cancel button",
+    slidedown: {
+      autoPrompt: true,
+      enabled: true,
+    }
+  };
+  const appConfig = await getFinalAppConfig(fakeUserConfig);
+  const promptOptions = appConfig.userConfig.promptOptions?.slidedown?.prompts[0];
+
+  t.is(promptOptions?.type, DelayedPromptType.Push);
+  t.is(promptOptions?.delay?.pageViews, 1);
+  t.is(promptOptions?.delay?.timeDelay, 0);
+  t.is(promptOptions?.autoPrompt, true);
+  t.is(promptOptions?.text.acceptButton, "Custom accept button");
+  t.is(promptOptions?.text.cancelButton, "Custom cancel button");
+  t.is(promptOptions?.text.actionMessage, "Custom message");
+});
+
 test("supports version 1 of config schema (converts to version 2) - slidedown type is 'push'", async t => {
   const fakeUserConfig: AppUserConfig = {
     appId: Random.getRandomUuid(),
