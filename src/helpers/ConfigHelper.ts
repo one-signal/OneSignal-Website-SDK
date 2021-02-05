@@ -40,7 +40,46 @@ export interface IntegrationCapabilities {
 const MAX_CATEGORIES = 10;
 
 export class ConfigHelper {
-  private static convertConfigToVersionTwo(slidedownConfig: SlidedownOptionsVersion1) : SlidedownOptions {
+  /**
+   * convertConfigToVersionOne - converts v0 schema to v1 schema format
+   *
+   * v0 schema example
+   * ---
+   *  promptOptions: {
+   *      acceptButtonText: '',
+   *      cancelButtonText: '',
+   *      actionMessage   : '',
+   *      slidedown: {...}
+   *  }
+   *
+   * v1 schema example
+   * ---
+   * "promptOptions": {
+   *    "slidedown": {
+   *      "enabled": true,
+   *      "autoPrompt": true,
+   *      "acceptButtonText": "",
+   *      "cancelButtonText": "",
+   *      "actionMessage": "",
+   *      "...",
+   *    }
+   * }
+   * @param  {any} promptOptions
+   * @returns AppUserConfigPromptOptions
+   */
+  private static convertConfigToVersionOne(promptOptions: any) : AppUserConfigPromptOptions {
+    if (!this.isPromptOptionsVersion0(promptOptions)) {
+      throw new Error("Cannot convert promptOptions config to version 1 since config is not version 0");
+    }
+
+    promptOptions.slidedown.acceptButtonText = promptOptions.acceptButton  || promptOptions.acceptButtonText;
+    promptOptions.slidedown.cancelButtonText = promptOptions.cancelButton  || promptOptions.cancelButtonText;
+    promptOptions.slidedown.actionMessage    = promptOptions.actionMessage || promptOptions.actionMessage;
+
+    return promptOptions;
+  }
+
+  private static convertConfigToVersionTwo(slidedownConfig: any) : SlidedownOptions {
     // determine if the slidedown is category type or regular push
     const promptType = PromptsHelper.isCategorySlidedownConfiguredVersion1(slidedownConfig) ?
       DelayedPromptType.Category : DelayedPromptType.Push;
@@ -57,8 +96,8 @@ export class ConfigHelper {
         autoPrompt: slidedownConfig.autoPrompt,
         text: {
           actionMessage: slidedownConfig.actionMessage,
-          acceptButton: slidedownConfig.acceptButton,
-          cancelButton: slidedownConfig.cancelButton,
+          acceptButton: slidedownConfig.acceptButton || slidedownConfig.acceptButtonText,
+          cancelButton: slidedownConfig.cancelButton || slidedownConfig.cancelButtonText,
           // categories-specific...
           positiveUpdateButton,
           negativeUpdateButton,
@@ -71,6 +110,28 @@ export class ConfigHelper {
         categories: slidedownConfig?.categories?.tags
       }]
     } as SlidedownOptions;
+  }
+
+  /**
+   * For use with Custom Code & Wordpress Implementations
+   * The OneSignal Wordpress Plugin still uses these legacy keys to set the slidedown text
+   * @param  {any} slidedownConfig
+   * @returns boolean
+   */
+  private static isPromptOptionsVersion0(slidedownConfig: any) : boolean {
+    if (!!slidedownConfig) {
+      const version0Keys = [
+        'acceptButtonText',
+        'cancelButtonText',
+        'actionMessage'
+      ];
+
+      for (let i = 0; i < version0Keys.length; i++) {
+        if (slidedownConfig.hasOwnProperty(version0Keys[i])) return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -106,7 +167,9 @@ export class ConfigHelper {
         'pageViews',
         'timeDelay',
         'acceptButton',
+        'acceptButtonText',
         'cancelButton',
+        'cancelButtonText',
         'actionMessage',
         'customizeTextEnabled',
         'categories'
@@ -127,11 +190,25 @@ export class ConfigHelper {
 
       const serverConfig = await downloadServerAppConfig(userConfig.appId);
       const isCustomCode = this.getConfigIntegrationKind(serverConfig) === ConfigIntegrationKind.Custom;
+      const isWordpress  = this.getConfigIntegrationKind(serverConfig) === ConfigIntegrationKind.WordPress;
+
+      if (this.isPromptOptionsVersion0(userConfig.promptOptions)) {
+        userConfig.promptOptions = this.convertConfigToVersionOne(userConfig.promptOptions);
+      }
 
       if (isCustomCode && !!userConfig.promptOptions?.slidedown) {
         if (this.isSlidedownConfigVersion1(userConfig.promptOptions.slidedown)) {
           userConfig.promptOptions.slidedown =
             this.convertConfigToVersionTwo(userConfig.promptOptions?.slidedown as SlidedownOptionsVersion1);
+        }
+      }
+
+      if (isWordpress && this.isPromptOptionsVersion0(userConfig.promptOptions)) {
+        userConfig.promptOptions = this.convertConfigToVersionOne(userConfig.promptOptions);
+
+        if (!!userConfig.promptOptions) {
+          userConfig.promptOptions.slidedown =
+            this.convertConfigToVersionTwo(userConfig.promptOptions?.slidedown);
         }
       }
 
