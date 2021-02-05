@@ -72,14 +72,22 @@ export class ConfigHelper {
       throw new Error("Cannot convert promptOptions config to version 1 since config is not version 0");
     }
 
+    if (!promptOptions.slidedown) {
+      promptOptions.slidedown = {};
+    }
+
     promptOptions.slidedown.acceptButtonText = promptOptions.acceptButton  || promptOptions.acceptButtonText;
     promptOptions.slidedown.cancelButtonText = promptOptions.cancelButton  || promptOptions.cancelButtonText;
-    promptOptions.slidedown.actionMessage    = promptOptions.actionMessage || promptOptions.actionMessage;
+    promptOptions.slidedown.actionMessage    = promptOptions.actionMessage;
 
     return promptOptions;
   }
 
   private static convertConfigToVersionTwo(slidedownConfig: any) : SlidedownOptions {
+    if (!this.isSlidedownConfigVersion1(slidedownConfig)) {
+      throw new Error("Cannot convert slidedown config to version 2 since config is not version 1");
+    }
+
     // determine if the slidedown is category type or regular push
     const promptType = PromptsHelper.isCategorySlidedownConfiguredVersion1(slidedownConfig) ?
       DelayedPromptType.Category : DelayedPromptType.Push;
