@@ -92,6 +92,8 @@ export interface AppUserConfigPromptOptions {
   exampleNotificationCaption?: string;
   acceptButton?: string;
   cancelButton?: string;
+  acceptButtonText?: string;  // legacy
+  cancelButtonText?: string;  // legacy
   showCredit?: string;
   native?: DelayedPromptOptions;
   slidedown?: SlidedownOptions;
