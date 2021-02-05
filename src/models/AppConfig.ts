@@ -131,8 +131,10 @@ export interface SlidedownOptionsVersion1 {
   autoPrompt: boolean;
   pageViews?: number;
   timeDelay?: number;
-  acceptButton: string;
-  cancelButton: string;
+  acceptButtonText?: string;
+  acceptButton?: string;
+  cancelButtonText?: string;
+  cancelButton?: string;
   actionMessage: string;
   customizeTextEnabled: boolean;
   categories?: Categories;
