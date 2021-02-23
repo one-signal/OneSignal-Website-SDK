@@ -216,7 +216,7 @@ export class ServiceWorkerManager {
     // 3.2 We don't care if the only differences is between OneSignal's A(Worker) vs B(WorkerUpdater) filename.
     if (serviceWorkerHrefs.indexOf(availableWorker.scriptURL) === -1) {
       Log.info(
-        "[changedServiceWorkerParams] ServiceWorker herf changing:",
+        "[changedServiceWorkerParams] ServiceWorker href changing:",
         { a_old: availableWorker?.scriptURL, b_new: serviceWorkerHrefs }
       );
       return true;
