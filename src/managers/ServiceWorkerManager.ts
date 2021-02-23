@@ -156,9 +156,9 @@ export class ServiceWorkerManager {
       }
     }
 
-    // 4. Is a OneSignal ServiceWorker not installed now?, if not and
-    //   notification permissions are enabled we should install.
-    //   This prevents an unnecessary install which saves bandwidth
+    // 4. Is a OneSignal ServiceWorker not installed now?
+    // If not and notification permissions are enabled we should install.
+    // This prevents an unnecessary install of the OneSignal worker which saves bandwidth
     const workerState = await this.getActiveState();
     Log.debug("[shouldInstallWorker] workerState", workerState);
     if (workerState === ServiceWorkerActiveState.None || workerState === ServiceWorkerActiveState.ThirdParty) {
@@ -173,7 +173,7 @@ export class ServiceWorkerManager {
     }
 
     // 5. We have a OneSignal ServiceWorker installed, but did the path or scope of the ServiceWorker change?
-    if (await this.changedServiceWorkerParams()) {
+    if (await this.haveParamsChanged()) {
       return true;
     }
 
@@ -181,7 +181,7 @@ export class ServiceWorkerManager {
     return this.workerNeedsUpdate();
   }
 
-  private async changedServiceWorkerParams(): Promise<boolean> {
+  private async haveParamsChanged(): Promise<boolean> {
     // 1. No workerRegistration
     const workerRegistration = await this.context.serviceWorkerManager.getRegistration();
     if (!workerRegistration) {
@@ -209,8 +209,12 @@ export class ServiceWorkerManager {
       this.config,
       this.context.appConfig.appId
     );
-    // We don't care if the only differences is between OneSignal's A(Worker) vs B(WorkerUpdater) filename.
-    if (serviceWorkerHrefs.indexOf(availableWorker?.scriptURL || "") === -1) {
+    // 3.1 If we can't get a scriptURL assume it is different
+    if (!availableWorker?.scriptURL) {
+      return true;
+    }
+    // 3.2 We don't care if the only differences is between OneSignal's A(Worker) vs B(WorkerUpdater) filename.
+    if (serviceWorkerHrefs.indexOf(availableWorker.scriptURL) === -1) {
       Log.info(
         "[changedServiceWorkerParams] ServiceWorker herf changing:",
         { a_old: availableWorker?.scriptURL, b_new: serviceWorkerHrefs }
