@@ -140,7 +140,7 @@ export class ServiceWorkerManager {
     if (!Environment.supportsServiceWorkers())
       return false;
 
-    // 2. Is OneSiganl initialized? 
+    // 2. Is OneSignal initialized?
     if (!OneSignal.config)
       return false;
 
@@ -149,7 +149,7 @@ export class ServiceWorkerManager {
       // No, if configured to use our subdomain (AKA HTTP setup) AND this is on their page (HTTP or HTTPS).
       // But since safari does not need subscription workaround, installing SW for session tracking.
       if (
-        OneSignal.environmentInfo.browserType !== "safari" && 
+        OneSignal.environmentInfo.browserType !== "safari" &&
           SdkEnvironment.getWindowEnv() === WindowEnvironmentKind.Host
       ) {
         return false;
@@ -158,7 +158,7 @@ export class ServiceWorkerManager {
 
     // 4. Is a OneSignal ServiceWorker not installed now?, if not and
     //   notification permissions are enabled we should install.
-    //   This prevents an unnessary install which saves bandwidth
+    //   This prevents an unnecessary install which saves bandwidth
     const workerState = await this.getActiveState();
     Log.debug("[shouldInstallWorker] workerState", workerState);
     if (workerState === ServiceWorkerActiveState.None || workerState === ServiceWorkerActiveState.ThirdParty) {
