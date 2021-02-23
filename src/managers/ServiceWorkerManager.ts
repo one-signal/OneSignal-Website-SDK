@@ -185,15 +185,21 @@ export class ServiceWorkerManager {
     // 1. No workerRegistration
     const workerRegistration = await this.context.serviceWorkerManager.getRegistration();
     if (!workerRegistration) {
-      Log.info("[changedServiceWorkerParams] workerRegistration not found at scope", this.config.registrationOptions.scope);
+      Log.info(
+        "[changedServiceWorkerParams] workerRegistration not found at scope",
+        this.config.registrationOptions.scope
+      );
       return true;
     }
 
     // 2. Different scope
-    const existingSwScope = new URL(workerRegistration.scope).pathname
+    const existingSwScope = new URL(workerRegistration.scope).pathname;
     const configuredSwScope = this.config.registrationOptions.scope;
     if (existingSwScope != configuredSwScope) {
-      Log.info("[changedServiceWorkerParams] ServiceWorker scope changing", { a_old: existingSwScope, b_new: configuredSwScope});
+      Log.info(
+        "[changedServiceWorkerParams] ServiceWorker scope changing",
+        { a_old: existingSwScope, b_new: configuredSwScope }
+      );
       return true;
     }
 
@@ -203,9 +209,12 @@ export class ServiceWorkerManager {
       this.config,
       this.context.appConfig.appId
     );
-    // We don't care if the only differences is between OneSignal's A(Woker) vs B(WorkerUpdater) filename.
+    // We don't care if the only differences is between OneSignal's A(Worker) vs B(WorkerUpdater) filename.
     if (serviceWorkerHrefs.indexOf(availableWorker?.scriptURL || "") === -1) {
-      Log.info("[changedServiceWorkerParams] ServiceWorker herf changing:", { a_old: availableWorker?.scriptURL, b_new: serviceWorkerHrefs });
+      Log.info(
+        "[changedServiceWorkerParams] ServiceWorker herf changing:",
+        { a_old: availableWorker?.scriptURL, b_new: serviceWorkerHrefs }
+      );
       return true;
     }
 
