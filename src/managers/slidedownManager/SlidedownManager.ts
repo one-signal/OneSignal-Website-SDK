@@ -81,11 +81,16 @@ export class SlidedownManager {
             slidedown.setFailureState(false);
         }
 
-        let smsInputFieldIsValid, emailInputFieldIsValid;
+        let smsInputFieldIsValid, emailInputFieldIsValid, isEmailEmpty, isSmsEmpty, email, sms;
+        email = sms = "";
 
         if (!!slidedown.channelCaptureContainer) {
             smsInputFieldIsValid = slidedown.channelCaptureContainer.smsInputFieldIsValid;
             emailInputFieldIsValid = slidedown.channelCaptureContainer.emailInputFieldIsValid;
+            isEmailEmpty = ChannelCaptureContainer.isEmailInputFieldEmpty();
+            isSmsEmpty = ChannelCaptureContainer.isSmsInputFieldEmpty();
+            email = ChannelCaptureContainer.getValueFromEmailInput();
+            sms = ChannelCaptureContainer.getValueFromSmsInput();
         }
 
         try {
@@ -107,29 +112,40 @@ export class SlidedownManager {
                     }
                     break;
                 case DelayedPromptType.Email:
-                    const isEmailEmpty = ChannelCaptureContainer.isEmailInputFieldEmpty();
                     if (!emailInputFieldIsValid || isEmailEmpty) {
                         throw new ChannelCaptureError(InvalidChannelInputField.InvalidEmail);
                     }
+                    this.context.updateManager.updateEmail(email);
                     break;
                 case DelayedPromptType.Sms:
-                    const isSmsEmpty = ChannelCaptureContainer.isSmsInputFieldEmpty();
                     if (!smsInputFieldIsValid || isSmsEmpty) {
                         throw new ChannelCaptureError(InvalidChannelInputField.InvalidSms);
                     }
+                    this.context.updateManager.updateSms(sms);
                     break;
                 case DelayedPromptType.SmsAndEmail:
-                    const bothFieldsEmpty = ChannelCaptureContainer.areBothInputFieldsEmpty();
+                    const bothFieldsEmpty = isEmailEmpty && isSmsEmpty;
                     const bothFieldsInvalid = !smsInputFieldIsValid && !emailInputFieldIsValid;
 
                     if (bothFieldsInvalid || bothFieldsEmpty) {
                         throw new ChannelCaptureError(InvalidChannelInputField.InvalidEmailAndSms);
                     }
 
-                    if (!smsInputFieldIsValid) throw new ChannelCaptureError(InvalidChannelInputField.InvalidSms);
-                    if (!emailInputFieldIsValid) throw new ChannelCaptureError(InvalidChannelInputField.InvalidEmail);
+                    if (emailInputFieldIsValid) {
+                        if (!isEmailEmpty) {
+                            this.context.updateManager.updateEmail(email);
+                        }
+                    } else {
+                        throw new ChannelCaptureError(InvalidChannelInputField.InvalidEmail);
+                    }
 
-                    // TO DO: send sms email updates
+                    if (smsInputFieldIsValid) {
+                        if (!isSmsEmpty) {
+                            this.context.updateManager.updateSms(sms);
+                        }
+                    } else {
+                        throw new ChannelCaptureError(InvalidChannelInputField.InvalidSms);
+                    }
                     break;
                 default:
                     break;
