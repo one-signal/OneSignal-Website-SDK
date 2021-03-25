@@ -400,6 +400,33 @@ export default class OneSignal {
     });
   }
 
+  public static async showSmsSlidedown(options?: AutoPromptOptions): Promise<void> {
+    await awaitOneSignalInitAndSupported();
+    const isPushEnabled = LocalStorage.getIsPushNotificationsEnabled();
+    await OneSignal.context.promptsManager.internalShowSmsSlidedown({
+      ...options,
+      isInUpdateMode: isPushEnabled
+    });
+  }
+
+  public static async showEmailSlidedown(options?: AutoPromptOptions): Promise<void> {
+    await awaitOneSignalInitAndSupported();
+    const isPushEnabled = LocalStorage.getIsPushNotificationsEnabled();
+    await OneSignal.context.promptsManager.internalShowEmailSlidedown({
+      ...options,
+      isInUpdateMode: isPushEnabled
+    });
+  }
+
+  public static async showSmsAndEmailSlidedown(options?: AutoPromptOptions): Promise<void> {
+    await awaitOneSignalInitAndSupported();
+    const isPushEnabled = LocalStorage.getIsPushNotificationsEnabled();
+    await OneSignal.context.promptsManager.internalShowSmsAndEmailSlidedown({
+      ...options,
+      isInUpdateMode: isPushEnabled
+    });
+  }
+
   /**
    * Prompts the user to subscribe.
    * @PublicApi
