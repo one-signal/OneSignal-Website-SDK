@@ -69,6 +69,11 @@ export class SlidedownManager {
         return false;
       }
 
+      if (isSubscribed && !options.isInUpdateMode) {
+        Log.info(new PermissionMessageDismissedError(slidedownType));
+        return false;
+      }
+
       if (wasDismissed && !options.force && !options.isInUpdateMode) {
         Log.info(new PermissionMessageDismissedError(slidedownType));
         return false;
