@@ -390,9 +390,7 @@ export default class Bell {
     const notOptedOut = await OneSignal.getSubscription();
     const doNotPrompt = DismissHelper.wasPromptOfTypeDismissed(DismissPrompt.Push);
 
-    // Resize to small instead of specified size if enabled, otherwise there's a jerking motion where the bell, at a different size than small, jerks sideways to go from large -> small or medium -> small
-    let resizeTo = (isPushEnabled ? 'small' : (this.options.size || this.DEFAULT_SIZE));
-    await this.launcher.resize(resizeTo);
+    await this.launcher.resize(this.options.size || this.DEFAULT_SIZE);
 
     this.addDefaultClasses();
 
