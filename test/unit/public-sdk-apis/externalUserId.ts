@@ -159,7 +159,7 @@ test("removeExternalUserId - executes after OneSignal is fully initialized", asy
   t.is(updateManagerSpy.calledOnce, true);
 });
 
-test("removeExternalUserId - does not try to remove external user id if not registered with OneSignal", async t => {
+test("removeExternalUserId - removes value from local db, before checking if registered with OneSignal", async t => {
   sinonSandbox.stub(OneSignal.context.subscriptionManager, "isAlreadyRegisteredWithOneSignal").resolves(false);
   const databaseSpy = sinonSandbox.stub(OneSignal.database, "setExternalUserId").resolves();
   // In order to test the state at this point, we reject to short circuit when the src calls this.
