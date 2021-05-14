@@ -121,8 +121,8 @@ export async function setupFakePlayerId(): Promise<string> {
   return subscription.deviceId;
 }
 
-export function simulateEventOfTypeOnElement(type: string, element: Element|null): void {
-  const allowClickEvent = document.createEvent("Event");
-  allowClickEvent.initEvent(type, true, true);
-  element?.dispatchEvent(allowClickEvent);
+export function simulateEventOfTypeOnElement(type: string, element: Element | null): void {
+  const event = document.createEvent("Event");
+  event.initEvent(type, true, true);
+  element?.dispatchEvent(event);
 }
