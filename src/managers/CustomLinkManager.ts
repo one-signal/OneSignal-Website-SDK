@@ -32,9 +32,9 @@ export class CustomLinkManager {
       return;
     }
 
-    for (let i=0; i<this.customlinkContainerElements.length; i++) {
-      await this.injectMarkup(this.customlinkContainerElements[i]);
-    }
+    await Promise.all(this.customlinkContainerElements.map(async elem => {
+      await this.injectMarkup(elem);
+    }));
   }
 
   private async injectMarkup(element: HTMLElement): Promise<void> {
@@ -78,33 +78,33 @@ export class CustomLinkManager {
     }
 
     if (this.config.text.subscribe) {
-      const subscribe = document.createElement("button");
-      addCssClass(subscribe, CUSTOM_LINK_CSS_CLASSES.resetClass);
-      addCssClass(subscribe, CUSTOM_LINK_CSS_CLASSES.subscribeClass);
+      const subscribeButton = document.createElement("button");
+      addCssClass(subscribeButton, CUSTOM_LINK_CSS_CLASSES.resetClass);
+      addCssClass(subscribeButton, CUSTOM_LINK_CSS_CLASSES.subscribeClass);
 
       if (this.config.size) {
-        addCssClass(subscribe, this.config.size);
+        addCssClass(subscribeButton, this.config.size);
       }
 
       if (this.config.style) {
-        addCssClass(subscribe, this.config.style);
+        addCssClass(subscribeButton, this.config.style);
       }
 
       if (this.isPushEnabled) {
-        addCssClass(subscribe, CUSTOM_LINK_CSS_CLASSES.state.subscribed);
+        addCssClass(subscribeButton, CUSTOM_LINK_CSS_CLASSES.state.subscribed);
       } else {
-        addCssClass(subscribe, CUSTOM_LINK_CSS_CLASSES.state.unsubscribed);
+        addCssClass(subscribeButton, CUSTOM_LINK_CSS_CLASSES.state.unsubscribed);
       }
 
-      this.setCustomColors(subscribe);
-      await this.setTextFromPushStatus(subscribe);
+      this.setCustomColors(subscribeButton);
+      await this.setTextFromPushStatus(subscribeButton);
 
-      subscribe.addEventListener("click", async () => {
+      subscribeButton.addEventListener("click", async () => {
         Log.info("CustomLink: subscribe clicked");
-        await this.handleClick(subscribe);
+        await this.handleClick(subscribeButton);
       });
 
-      element.appendChild(subscribe);
+      element.appendChild(subscribeButton);
     }
   }
 
@@ -177,10 +177,14 @@ export class CustomLinkManager {
   }
 
   private setCustomColors(element: HTMLElement): void {
-    if (this.config?.style === "button" && this.config?.color && this.config?.color.button && this.config?.color.text) {
+    if (!this.config?.color || !this.config.color.text) {
+      return;
+    }
+
+    if (this.config?.style === "button" && this.config?.color.button) {
       element.style.backgroundColor = this.config?.color.button;
       element.style.color = this.config?.color.text;
-    } else if (this.config?.style === "link" && this.config?.color && this.config?.color.text) {
+    } else if (this.config?.style === "link") {
       element.style.color = this.config?.color.text;
     }
   }
