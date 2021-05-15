@@ -14,8 +14,8 @@ import { simulateEventOfTypeOnElement } from '../../support/tester/utils';
 const sandbox: SinonSandbox = sinon.sandbox.create();
 let config: AppUserConfigCustomLinkOptions;
 
-const setSubscriptionStub = function(subscription: boolean) {
-  EventsTestHelper.simulateSubscriptionChanged(subscription);
+const setSubscriptionStub = async function() {
+  await EventsTestHelper.simulateSubscriptionChanged(true);
 };
 
 test.beforeEach(async () => {
@@ -61,6 +61,7 @@ test('customlink: container: not render if disabled', async t => {
 
 test('customlink: container: render if enabled, explanation present', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   await new CustomLinkManager(config).initialize();
 
@@ -75,6 +76,7 @@ test('customlink: container: render if enabled, explanation present', async t =>
 
 test('customlink: container: render if enabled, no explanation', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   config.text.explanation = "";
   await new CustomLinkManager(config).initialize();
@@ -89,6 +91,7 @@ test('customlink: container: render if enabled, no explanation', async t => {
 
 test("customlink: push enabled text and state", async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   const manager = new CustomLinkManager(config);
   await manager.initialize();
@@ -101,6 +104,7 @@ test("customlink: push enabled text and state", async t => {
 
 test('customlink: push disabled text and state', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(false);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(false);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   await new CustomLinkManager(config).initialize();
 
@@ -113,6 +117,7 @@ test('customlink: push disabled text and state', async t => {
 
 test('customlink: subscribe: intitialized, push enabled', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   await new CustomLinkManager(config).initialize();
 
@@ -126,6 +131,7 @@ test('customlink: subscribe: intitialized, push enabled', async t => {
 
 test('customlink: subscribe: intitialized, push disabled', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(false);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(false);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   await new CustomLinkManager(config).initialize();
 
@@ -139,6 +145,7 @@ test('customlink: subscribe: intitialized, push disabled', async t => {
 
 test('customlink: subscribe: unsubscribe disabled', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   config.unsubscribeEnabled = false;
   await new CustomLinkManager(config).initialize();
@@ -151,6 +158,7 @@ test('customlink: subscribe: unsubscribe disabled', async t => {
 
 test('customlink: subscribe: unsubscribe enabled', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   await new CustomLinkManager(config).initialize();
 
@@ -167,6 +175,7 @@ test('customlink: subscribe: unsubscribe enabled', async t => {
 
 test('customlink: subscribe: button', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   config.style = "button";
   await new CustomLinkManager(config).initialize();
@@ -182,6 +191,7 @@ test('customlink: subscribe: button', async t => {
 
 test('customlink: subscribe: link', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   config.style = "link";
   await new CustomLinkManager(config).initialize();
@@ -197,6 +207,7 @@ test('customlink: subscribe: link', async t => {
 
 test('customlink: reinitialize', async t => {
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(false);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(false);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
   await new CustomLinkManager(config).initialize();
   await new CustomLinkManager(config).initialize();
@@ -207,10 +218,12 @@ test('customlink: reinitialize', async t => {
 test('customlink: subscribe: clicked: subscribed -> unsubscribed', async t => {
   const subscriptionPromise = EventsTestHelper.getSubscriptionPromise();
   new EventsTestHelper(sandbox).simulateSubscribingAfterNativeAllow();
-
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(true);
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(false);
-  const subscriptionSpy = sandbox.stub(OneSignal, 'setSubscription').resolves(setSubscriptionStub(true));
+  const subscriptionSpy = sandbox.stub(OneSignal, 'setSubscription').callsFake(async () => {
+    await setSubscriptionStub();
+  });
   sandbox.stub(OneSignalUtils, 'isUsingSubscriptionWorkaround').returns(false);
   sandbox.stub(OneSignal.context.subscriptionManager, 'getSubscriptionState').returns({
     subscribed: true,
@@ -224,6 +237,7 @@ test('customlink: subscribe: clicked: subscribed -> unsubscribed', async t => {
   t.not(explanationElement, null);
 
   if (subscribeElement && explanationElement) {
+    sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(true);
     simulateEventOfTypeOnElement("click", subscribeElement);
     await subscriptionPromise;
 
@@ -236,10 +250,14 @@ test('customlink: subscribe: clicked: subscribed -> unsubscribed', async t => {
 test('customlink: subscribe: clicked: unsubscribed -> subscribed. https. opted out', async t => {
   const subscriptionPromise = EventsTestHelper.getSubscriptionPromise();
   sandbox.stub(OneSignal, 'privateIsPushNotificationsEnabled').returns(false);
-  const subscriptionSpy = sandbox.stub(OneSignal, 'setSubscription').resolves(setSubscriptionStub(true));
+  sandbox.stub(CustomLinkManager as any, "isPushEnabled").resolves(false);
   sandbox.stub(OneSignalUtils, 'isUsingSubscriptionWorkaround').returns(false);
+  const subscriptionSpy = sandbox.stub(OneSignal, 'setSubscription').callsFake(async () => {
+    await setSubscriptionStub();
+  });
   // TODO: why is this called in custom link
   sandbox.stub(DismissHelper, 'wasPromptOfTypeDismissed').returns(false);
+  sandbox.stub(CustomLinkManager as any, "isOptedOut").resolves(true);
   sandbox.stub(OneSignal, 'internalIsOptedOut').returns(true);
   sandbox.stub(OneSignal.context.subscriptionManager, 'getSubscriptionState').returns({
     subscribed: true,
