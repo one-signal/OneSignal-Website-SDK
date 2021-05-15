@@ -7,8 +7,6 @@ import { AppUserConfigCustomLinkOptions } from "../models/Prompts";
 
 export class CustomLinkManager {
   private config: AppUserConfigCustomLinkOptions | undefined;
-  private isPushEnabled: boolean = false;
-  private isOptedOut: boolean = false;
 
   constructor(config?: AppUserConfigCustomLinkOptions) {
     this.config = config;
@@ -25,27 +23,25 @@ export class CustomLinkManager {
 
     Log.info("OneSignal: initializing customlink");
 
-    await this.updateSubscriptionState();
-
-    if (!this.config?.unsubscribeEnabled && this.isPushEnabled) {
+    if (!this.config?.unsubscribeEnabled && await this.isPushEnabled()) {
       this.hideCustomLinkContainers();
       return;
     }
-
-    await Promise.all(this.customlinkContainerElements.map(async elem => {
-      await this.injectMarkup(elem);
-    }));
+    // traditional for-loop required here to avoid layout shift
+    for (let i=0; i<this.customlinkContainerElements.length; i++) {
+      await this.injectMarkup(this.customlinkContainerElements[i]);
+    }
   }
 
   private async injectMarkup(element: HTMLElement): Promise<void> {
     // clear contents
     element.innerHTML = '';
 
-    this.mountExplanationNode(element);
+    await this.mountExplanationNode(element);
     await this.mountSubscriptionNode(element);
   }
 
-  private mountExplanationNode(element: HTMLElement): void {
+  private async mountExplanationNode(element: HTMLElement): Promise<void> {
     if (!this.config?.text) {
       Log.error("CustomLink: required property 'text' is missing in the config");
       return;
@@ -61,7 +57,7 @@ export class CustomLinkManager {
         addCssClass(explanation, this.config.size);
       }
 
-      if (this.isPushEnabled) {
+      if (await this.isPushEnabled()) {
         addCssClass(explanation, CUSTOM_LINK_CSS_CLASSES.state.subscribed);
       } else {
         addCssClass(explanation, CUSTOM_LINK_CSS_CLASSES.state.unsubscribed);
@@ -90,7 +86,7 @@ export class CustomLinkManager {
         addCssClass(subscribeButton, this.config.style);
       }
 
-      if (this.isPushEnabled) {
+      if (await this.isPushEnabled()) {
         addCssClass(subscribeButton, CUSTOM_LINK_CSS_CLASSES.state.subscribed);
       } else {
         addCssClass(subscribeButton, CUSTOM_LINK_CSS_CLASSES.state.unsubscribed);
@@ -132,48 +128,40 @@ export class CustomLinkManager {
   }
 
   private async handleClick(element: HTMLElement): Promise<void> {
-    this.updateSubscriptionState();
-
-    if (this.isPushEnabled) {
+    if (await this.isPushEnabled()) {
       await OneSignal.setSubscription(false);
-      this.setTextFromPushStatus(element);
+      await this.setTextFromPushStatus(element);
     } else {
-      if (!this.isOptedOut) {
+      if (!await this.isOptedOut()) {
         const autoAccept = !OneSignal.environmentInfo.requiresUserInteraction;
         const options: RegisterOptions = { autoAccept };
         await OneSignal.registerForPushNotifications(options);
         // once subscribed, prevent unsubscribe by hiding customlinks
-        if (!this.config?.unsubscribeEnabled && this.isPushEnabled) {
+        if (!this.config?.unsubscribeEnabled && await this.isPushEnabled()) {
           this.hideCustomLinkContainers();
         }
         return;
       }
       await OneSignal.setSubscription(true);
       // once subscribed, prevent unsubscribe by hiding customlinks
-      if (!this.config?.unsubscribeEnabled && this.isPushEnabled) {
+      if (!this.config?.unsubscribeEnabled && await this.isPushEnabled()) {
         this.hideCustomLinkContainers();
       }
     }
   }
 
   private async setTextFromPushStatus(element: HTMLElement): Promise<void> {
-    await this.updateSubscriptionState();
     if (this.config?.text?.subscribe) {
-      if (!this.isPushEnabled) {
+      if (!await this.isPushEnabled()) {
         element.textContent = this.config.text.subscribe;
       }
     }
 
     if (this.config?.text?.unsubscribe) {
-      if (this.isPushEnabled) {
+      if (await this.isPushEnabled()) {
         element.textContent = this.config.text.unsubscribe;
       }
     }
-  }
-
-  private async updateSubscriptionState(): Promise<void> {
-    this.isPushEnabled = await OneSignal.privateIsPushNotificationsEnabled();
-    this.isOptedOut    = await OneSignal.internalIsOptedOut();
   }
 
   private setCustomColors(element: HTMLElement): void {
@@ -187,6 +175,14 @@ export class CustomLinkManager {
     } else if (this.config?.style === "link") {
       element.style.color = this.config?.color.text;
     }
+  }
+
+  private async isPushEnabled(): Promise<boolean> {
+    return await OneSignal.privateIsPushNotificationsEnabled();
+  }
+
+  private async isOptedOut(): Promise<boolean> {
+    return await OneSignal.internalIsOptedOut();
   }
 
   get customlinkContainerElements(): HTMLElement[] {
