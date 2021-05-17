@@ -14,6 +14,7 @@ $customlink-base-padding-vertical: 8px;
   &.hide {
     display: none;
   }
+  min-height: 6em;
 }
 
 .onesignal-customlink-subscribe {
@@ -39,7 +40,6 @@ $customlink-base-padding-vertical: 8px;
     touch-action: manipulation;
     font-weight: 600px;
     border-radius: 4px;
-    height: 20px;
     cursor: pointer;
     &:hover, &:focus, &:active {
       text-decoration: none;
