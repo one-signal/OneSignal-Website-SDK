@@ -24,8 +24,7 @@ const appConfig = TestEnvironment.getFakeAppConfig();
 
 test.beforeEach(async function() {
   sandbox = sinon.sandbox.create();
-  
-  await TestEnvironment.initializeForServiceWorker();
+  await TestEnvironment.initializeForServiceWorker({ stubSetTimeout: true });
 
   await Database.setAppConfig(appConfig);
 });
